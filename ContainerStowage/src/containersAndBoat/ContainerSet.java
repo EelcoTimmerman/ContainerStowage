@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Random;
 
 public class ContainerSet {
-	public static int nrOfContainers = 3;
+	public static int nrOfContainers = 5;
 	public static double probOfExport = 0.5;
 	public List<Container> containers = new ArrayList<>();
+	
 	public void createSetOfContainers() {
 		int id = 0;
 		Random rand = new Random();

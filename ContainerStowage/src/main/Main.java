@@ -13,6 +13,7 @@ public class Main {
 		ContainerSet cset = new ContainerSet();
 		cset.createSetOfContainers();
 		cset.allTalk();
+		//To Do;; give all the containers a location and report this.
 	}
 
 
