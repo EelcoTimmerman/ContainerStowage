@@ -3,7 +3,7 @@ package containersAndBoat;
 public class Boat {
 //Hey this is a boat
 	public static int nrOfBays = 4;
-	public static int nrOfLayers = 2;
+	public static int nrOfLayers = 3;
 	public static int nrOfRows = 2;
 //TO DO:: we need the specifications of the boat
 	public static int weightBoat;
