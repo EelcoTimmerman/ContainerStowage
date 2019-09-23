@@ -13,6 +13,7 @@ public class Main {
 		ContainerSet cset = new ContainerSet();
 		cset.createSetOfContainers();
 		cset.allTalk();
+		cset.allTalk();
 	}
 
 
