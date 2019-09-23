@@ -28,5 +28,9 @@ public class Container {
 		public void setWeight(int newweight) {
 			this.weight = newweight;
 		}
+		
+		public void findLocation(){
+			//To Do: create this method
+		}
 
 }

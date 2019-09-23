@@ -34,4 +34,9 @@ public class ContainerSet {
 			c.talk();
 		}
 	}
+	
+	public List<Container> getContainers() {
+		return containers;
+		
+	}
 }
