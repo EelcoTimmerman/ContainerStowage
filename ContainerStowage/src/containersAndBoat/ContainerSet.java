@@ -1,5 +1,7 @@
 package containersAndBoat;
 import containersAndBoat.Container;
+import stowage.Terminal;
+import stowage.TerminalSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,7 @@ public class ContainerSet {
 	public void createSetOfContainers() {
 		int id = 0;
 		Random rand = new Random();
-
+		
 		for(int i=0; i < nrOfContainers; i++) {
 			Container cont = new Container(id);
 			id++;
@@ -24,7 +26,7 @@ public class ContainerSet {
 				cont.setType(ContainerType.TWENTY);
 			}
 			cont.weight = n;//This is not the actual weight yet, still need to look for that.
-			//TO DO: here needs to be a label for a destination, this also decides export\import
+			cont.setDestination(TerminalSet.terminals.get(1));
 			containers.add(cont);
 			}
 	}
