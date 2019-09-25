@@ -5,7 +5,7 @@ import stowage.Terminal;
 
 public class Boat {
 //Hey this is a boat
-	public int nrOfBays = 5;
+	public int nrOfBays = 4;
 	public int nrOfLayers = 2;
 	public int nrOfRows = 2;
 //TO DO:: we need the specifications of the boat
@@ -39,13 +39,26 @@ public class Boat {
 		
 	}
 	
-	public void setLocationOccupied(int layer, int row, int bay) {
+	public void set20footSpotOccupied(int layer, int row, int bay) {
 		stowage[layer][row][bay] = 1;
 	}
 	
-	public void setLocationEmpty(int layer, int row, int bay) {
+	public void set40footSpotOccupied(int layer, int row, int bay) {
+		if(bay >= nrOfBays - 1) {
+			System.out.print("Trying to put a container overboard nerd..");
+		}
+		stowage[layer][row][bay] = 2;
+		stowage[layer][row][bay + 1] = 2;
+	}
+	
+	public void set20LocationEmpty(int layer, int row, int bay) {
 		stowage[layer][row][bay] = 0;
 	}	
+	
+	public void set40LocationEmpty(int layer, int row, int bay) {
+		stowage[layer][row][bay] = 0;
+		stowage[layer][row][bay + 1] = 0;
+	}
 	
 	public void visitTerminal(Terminal terminal, Boat boat) {
 		for(Container c: ContainerSet.containers) {

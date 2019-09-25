@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Random;
 
 public class ContainerSet {
-	public static int nrOfContainers = 10;
+	public static int nrOfContainers = 3;
 	public static double probOfExport = 0.5;
+	public static double probOf20foot = 0.5;
 	public static List<Container> containers = new ArrayList<>();
 	
 	public void createSetOfContainers() {
@@ -30,7 +31,12 @@ public class ContainerSet {
 				c.export = false;
 				TerminalSet.terminals.get(ind).loadImport(c);
 			}
-			c.setType(ContainerType.FORTY);
+			int shh = rand.nextInt(100);
+			if(shh>probOfExport*100) {
+				c.setType(ContainerType.FORTY);
+			}else {
+				c.setType(ContainerType.TWENTY);
+			}
 
 			c.weight = n;//This is not the actual weight yet, still need to look for that.
 			//Add this shizzle to the terminals...

@@ -22,7 +22,12 @@ public class Container {
 		}
 		public void tellPosition() {
 			int rew = id+1;
-			System.out.printf("Container nr" + rew +" in position " + zLoc + yLoc + xLoc + "\n");
+			if(this.type == ContainerType.TWENTY) {
+				System.out.printf("Container nr" + rew +", 20foot, in position " + zLoc + yLoc + xLoc + "\n");
+			}else{
+				System.out.printf("Container nr" + rew +", 40foot, in position " + zLoc + yLoc + xLoc + "\n");
+			}
+			
 		}
 		
 		public void tellDestination() {
@@ -52,11 +57,16 @@ public class Container {
 			for(int i = 0; i< boat.nrOfLayers;i++) {
 				  for(int j = 0; j< boat.nrOfRows;j++) {
 					  for(int k = 0; k< boat.nrOfBays;k++) {
-						  if( isFeasible(boat,i,j,k) ) {
-							  boat.setLocationOccupied(i,j,k);
-							  updateLocationOnBarge(i,j,k);
-							  break outerloop;
-						  }
+							  if(this.type == ContainerType.TWENTY) {
+								 if( is20Feasible ) {
+									  boat.set20footSpotOccupied(i,j,k);
+									  updateLocationOnBarge(i,j,k);
+									  break outerloop;
+								 }
+							  }else {
+								  boat.set40footSpotOccupied(i,j,k);
+							  }
+
 						  
 					  }
 				  }  
@@ -74,27 +84,50 @@ public class Container {
 			if(export == false) {
 				System.out.print("This is an import container, it should never be removed");
 			}
-			barge.setLocationEmpty(this.zLoc, this.yLoc, this.xLoc);
-			this.xLoc = -1;
-			this.yLoc = -1;
-			this.zLoc = -1;
-			this.isOnBarge = false;
+				if(this.type == ContainerType.TWENTY) {
+					barge.set20LocationEmpty(this.zLoc, this.yLoc, this.xLoc);
+				}else {
+					barge.set40LocationEmpty(this.zLoc, this.yLoc, this.xLoc);
+				}
+				this.xLoc = -1;
+				this.yLoc = -1;
+				this.zLoc = -1;
+				this.isOnBarge = false;
+
+
 		}
 		
-		 public boolean isFeasible(Boat boat, int i, int j, int k) {
+		 public boolean is20Feasible(Boat boat, int i, int j, int k) {
 			int count = 0;	
-			 if(boat.stowage[i][j][k] == 0) {
-					count++;
-				}
-			 if( (i==0) || (i>0 && boat.stowage[i-1][j][k] != 0) ) {
-				 count++;
-			 }
-			 if(count == 2) {
-				 return true;
-			 }else {
-				 return false;
-			 }
+			if(boat.stowage[i][j][k] == 0) {
+						count++;
 			}
+					if( (i==0) || (i>0 && boat.stowage[i-1][j][k] == 1) ) {
+						System.out.print("Second cond met\n");
+						count++;
+					}
+
+			
+				if(count == 2) {
+					return true;
+				}else {
+					return false;
+				}
+		 }
+		 
+		 public boolean is40Feasible(Boat boat, int i, int j, int k) {
+				
+			 if(k < boat.nrOfBays -1) {
+					if(k==0 || k % 2 == 0) {
+						System.out.print("First cond met\n");
+						count++;
+					}					
+					if(boat.stowage[i][j][k] == 0 && boat.stowage[i][j][k+1] == 0) {
+						System.out.print("Second cond met\n");
+						count++;
+					}
+				}
+		 }
 		
 
 

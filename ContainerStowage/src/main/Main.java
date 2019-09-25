@@ -1,11 +1,8 @@
 package main;
 import java.util.List;
-import java.util.Random;
-
 import containersAndBoat.Boat;
 import containersAndBoat.Container;
 import containersAndBoat.ContainerSet;
-import containersAndBoat.ContainerType;
 import stowage.CreateStowage;
 import stowage.TerminalSet;
 import stowage.Terminal;
@@ -24,17 +21,17 @@ public class Main {
 		stowagePlanner.createInitialStowage();
 		cset.allTellDestination();
 		cset.allTellPosition();
-		boat.showStowage();
 		for(Terminal t: TerminalSet.terminals) {
 			if(t.id == 0 ) {
+				System.out.printf("Hey I am terminal 0, the starting stowage is: %n");
+				boat.showStowage();
+				cset.allTellPosition();
 				continue;
-			}
-			System.out.printf("Heyy....this is terminal nr: " + t.id);
+			}		
+			t.talk();
 			boat.visitTerminal(t, boat);
-			boat.showStowage();
-		}
-		//Here will be the sailing part, and will the costs for every possible route be calculated, times its probability
-		
+			cset.allTellPosition();
+		}		
 	}
 
 

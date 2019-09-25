@@ -1,6 +1,8 @@
 package stowage;
 import java.util.ArrayList;
 import java.util.List;
+
+import containersAndBoat.Boat;
 import containersAndBoat.Container;
 
 public class Terminal {
@@ -13,7 +15,7 @@ public class Terminal {
 	}
 	
 	public void talk() {
-		System.out.printf("Hey I am terminal "+ this.id + "%n");
+		System.out.printf("Hey I am terminal "+ this.id + ", after loading and unloading, the stowage here is: %n");
 	}
 	
 	public void unloadExport(Container c) {

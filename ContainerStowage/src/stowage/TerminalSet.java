@@ -4,7 +4,7 @@ import java.util.List;
 import stowage.Terminal;
 
 public class TerminalSet {
-	public static int nrOfTerminals = 4;
+	public static int nrOfTerminals = 3;
 	public static List<Terminal> terminals = new ArrayList<>();
 	
 	public TerminalSet() {
@@ -12,7 +12,6 @@ public class TerminalSet {
 		for(int i = 0; i<nrOfTerminals; i++) {
 			Terminal terminal = new Terminal(id);
 			id++;
-			terminal.talk();
 			terminals.add(terminal);
 		}	
 	}
