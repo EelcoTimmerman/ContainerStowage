@@ -8,6 +8,7 @@ import containersAndBoat.ContainerSet;
 import containersAndBoat.ContainerType;
 import stowage.CreateStowage;
 import stowage.TerminalSet;
+import stowage.Terminal;
 
 public class Main {
 //Hey this is my first line, but its a comment so it doesnt do anyhting...
@@ -21,8 +22,17 @@ public class Main {
 		List <Container> containers = cset.getContainers();
 		CreateStowage stowagePlanner = new CreateStowage(containers, boat);
 		stowagePlanner.createInitialStowage();
-		stowagePlanner.talk();
+		cset.allTellDestination();
+		cset.allTellPosition();
 		boat.showStowage();
+		for(Terminal t: TerminalSet.terminals) {
+			if(t.id == 0 ) {
+				continue;
+			}
+			System.out.printf("Heyy....this is terminal nr: " + t.id);
+			boat.visitTerminal(t, boat);
+			boat.showStowage();
+		}
 		//Here will be the sailing part, and will the costs for every possible route be calculated, times its probability
 		
 	}

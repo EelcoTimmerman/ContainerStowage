@@ -9,7 +9,8 @@ public class Container {
 		public int xLoc;
 		public int yLoc;
 		public int zLoc;
-		public boolean hasLocation;
+		public boolean isOnBarge;
+		public boolean export;
 
 		
 		public Container(int id) {
@@ -17,11 +18,21 @@ public class Container {
 			xLoc = -1;
 			yLoc = -1;
 			zLoc = -1;
-			hasLocation = false;
+			isOnBarge = false;
 		}
-		public void talk() {
+		public void tellPosition() {
 			int rew = id+1;
-			System.out.printf("Hey I am container nr" + rew +" in position " + zLoc + yLoc + xLoc + "\n");
+			System.out.printf("Container nr" + rew +" in position " + zLoc + yLoc + xLoc + "\n");
+		}
+		
+		public void tellDestination() {
+			int cId = id+1;
+			int tId = this.destination.id;
+			if(export == true) {
+				System.out.printf("Container nr" + cId +", to be exported to destination:" + tId +"\n");
+			}else {
+				System.out.printf("Container nr" + cId +", to be imported from destination:" + tId +"\n");
+			}
 		}
 		
 		public void setType(ContainerType newtype){
@@ -56,14 +67,18 @@ public class Container {
 			this.xLoc = k;
 			this.yLoc = j;
 			this.zLoc = i;
-			this.hasLocation = true;
+			this.isOnBarge = true;
 		}
 		
-		public void removeFromBarge() {
+		public void removeFromBarge(Boat barge) {
+			if(export == false) {
+				System.out.print("This is an import container, it should never be removed");
+			}
+			barge.setLocationEmpty(this.zLoc, this.yLoc, this.xLoc);
 			this.xLoc = -1;
 			this.yLoc = -1;
 			this.zLoc = -1;
-			this.hasLocation = false;
+			this.isOnBarge = false;
 		}
 		
 		 public boolean isFeasible(Boat boat, int i, int j, int k) {

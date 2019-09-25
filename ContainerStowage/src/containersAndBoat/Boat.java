@@ -1,16 +1,20 @@
 package containersAndBoat;
+import java.util.List;
+
+import stowage.Terminal;
 
 public class Boat {
 //Hey this is a boat
-	public int nrOfBays = 4;
-	public int nrOfLayers = 3;
-	public int nrOfRows = 3;
+	public int nrOfBays = 5;
+	public int nrOfLayers = 2;
+	public int nrOfRows = 2;
 //TO DO:: we need the specifications of the boat
 	public static int weightBoat;
 	//create a variable that indicates the stowage, probably a 3D
 	public int[][][] stowage = new int[nrOfLayers][nrOfRows][nrOfBays];
 	
 	public Boat() {
+		System.out.print("Initial stowage: \n");
 		showStowage();
 	}
 	
@@ -39,9 +43,21 @@ public class Boat {
 		stowage[layer][row][bay] = 1;
 	}
 	
-	public void visitTerminal(int t) {
-		//it needs to select the containers that are destined to this terminal, and then 
-		//unload them, then select the import containers that are needed and load them.
+	public void setLocationEmpty(int layer, int row, int bay) {
+		stowage[layer][row][bay] = 0;
+	}	
+	
+	public void visitTerminal(Terminal terminal, Boat boat) {
+		for(Container c: ContainerSet.containers) {
+			if(c.destination == terminal && c.isOnBarge && c.export) {
+				terminal.unloadExport(c);
+				c.removeFromBarge(boat);
+			}if(c.destination == terminal && c.isOnBarge == false && c.export == false){
+				terminal.loadImport(c);
+				c.findFeasibleLocation(boat);
+			}
+		}
+		showStowage();
 	}
 	
 }

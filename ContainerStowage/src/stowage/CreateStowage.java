@@ -14,16 +14,12 @@ public class CreateStowage {
 		 this.containers = container;
 		 this.boat = boat;
 	 }
-	
-	
-	 public void talk() {
-		  for(Container c: containers) { c.talk(); }
-		  }
-	 
-	 
+	 	 
 	 public void createInitialStowage() {
 		 for(Container c: containers) {
-			 c.findFeasibleLocation(boat);
+			 if(c.export) {
+				 c.findFeasibleLocation(boat);
+			 }
 		 }
 
 	 }
