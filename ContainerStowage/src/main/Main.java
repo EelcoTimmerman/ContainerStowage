@@ -19,8 +19,6 @@ public class Main {
 		List <Container> containers = cset.getContainers();
 		CreateStowage stowagePlanner = new CreateStowage(containers, boat);
 		stowagePlanner.createInitialStowage();
-		cset.allTellDestination();
-		cset.allTellPosition();
 		for(Terminal t: TerminalSet.terminals) {
 			if(t.id == 0 ) {
 				System.out.printf("Hey I am terminal 0, the starting stowage is: %n");
@@ -31,7 +29,8 @@ public class Main {
 			t.talk();
 			boat.visitTerminal(t, boat);
 			cset.allTellPosition();
-		}		
+		}
+		cset.reportPerformance();
 	}
 
 

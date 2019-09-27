@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ContainerSet {
-	public static int nrOfContainers = 3;
+	public static int nrOfContainers = 5;
 	public static double probOfExport = 0.5;
 	public static double probOf20foot = 0.5;
 	public static List<Container> containers = new ArrayList<>();
@@ -26,10 +26,10 @@ public class ContainerSet {
 			if(n>probOfExport*100) { //This can be found in fazi's paper
 				c.export = true;
 				//need to be added to the export list of the terminal
-				TerminalSet.terminals.get(ind).unloadExport(c);
+				TerminalSet.terminals.get(ind).initExport(c);
 			}else {
 				c.export = false;
-				TerminalSet.terminals.get(ind).loadImport(c);
+				TerminalSet.terminals.get(ind).initImport(c);
 			}
 			int shh = rand.nextInt(100);
 			if(shh>probOfExport*100) {
@@ -50,14 +50,18 @@ public class ContainerSet {
 		}
 	}
 	
-	public void allTellDestination() {
-		for(Container c: containers) {
-			c.tellDestination();
-		}
+	public List<Container> getContainers() {
+		return containers;	
 	}
 	
-	public List<Container> getContainers() {
-		return containers;
-		
+	public void reportPerformance() {
+		//do this only at the end..
+			int totalTransported =0;
+		for(Container c: containers) {
+			if(c.transported == true) {
+				totalTransported++;
+			}
+		}
+		System.out.printf("In total there have been transported "+totalTransported+" containers..\n");
 	}
 }

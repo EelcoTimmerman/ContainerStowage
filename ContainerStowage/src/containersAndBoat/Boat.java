@@ -1,6 +1,7 @@
 package containersAndBoat;
 import java.util.List;
 
+import stowage.CreateStowage;
 import stowage.Terminal;
 
 public class Boat {
@@ -19,7 +20,8 @@ public class Boat {
 	}
 	
 	public void showStowage() {
-		  for(int i = 0; i<nrOfLayers;i++) {
+		System.out.print("Stowage:\n");  
+		for(int i = 0; i<nrOfLayers;i++) {
 			  for(int j = 0; j<nrOfRows;j++) {
 				  for(int k = 0; k<nrOfBays;k++) {
 					  System.out.print(stowage[i][j][k]);
@@ -61,16 +63,9 @@ public class Boat {
 	}
 	
 	public void visitTerminal(Terminal terminal, Boat boat) {
-		for(Container c: ContainerSet.containers) {
-			if(c.destination == terminal && c.isOnBarge && c.export) {
-				terminal.unloadExport(c);
-				c.removeFromBarge(boat);
-			}if(c.destination == terminal && c.isOnBarge == false && c.export == false){
-				terminal.loadImport(c);
-				c.findFeasibleLocation(boat);
-			}
-		}
-		showStowage();
+		CreateStowage.removeExport(boat, terminal);
+		CreateStowage.loadImport(boat, terminal);
+		//showStowage();
 	}
 	
 }

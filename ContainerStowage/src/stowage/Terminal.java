@@ -2,28 +2,48 @@ package stowage;
 import java.util.ArrayList;
 import java.util.List;
 
-import containersAndBoat.Boat;
 import containersAndBoat.Container;
 
 public class Terminal {
 	public int id;//Dry port has ID 0
-	public List<Container> exportSet = new ArrayList<>();
-	public List<Container> importSet = new ArrayList<>();
+	public List<Container> deliveredExport = new ArrayList<>();
+	public List<Container> unDeliveredExport = new ArrayList<>();
+	public List<Container> loadedImport = new ArrayList<>();	
+	public List<Container> unloadedImport = new ArrayList<>();
+	public List<Container> shiftedContainers = new ArrayList<>();//This list should always be empty after sailing away from the terminal
 	
 	public Terminal(int id) {
 		this.id = id;
 	}
 	
 	public void talk() {
-		System.out.printf("Hey I am terminal "+ this.id + ", after loading and unloading, the stowage here is: %n");
+		System.out.printf("Hey I am terminal "+ this.id + ", the loading sequence at this terminal is as follows: %n");
 	}
 	
 	public void unloadExport(Container c) {
-		exportSet.add(c);
-	}
+		deliveredExport.add(c);
+		unDeliveredExport.remove(c);
+	}	
 	
 	public void loadImport(Container c) {
-		importSet.remove(c);
+		loadedImport.add(c);
+		unloadedImport.remove(c);
+	}
+	
+	public void initExport(Container c) {
+		unDeliveredExport.add(c);
+	}
+	
+	public void initImport(Container c) {
+		unloadedImport.add(c);
+	}
+	
+	public void addToShift(Container c) {
+		shiftedContainers.add(c);
+	}
+	
+	public void removeFromShift(Container c) {
+		shiftedContainers.remove(c);
 	}
 	
 }
