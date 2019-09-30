@@ -5,13 +5,11 @@ import stowage.CreateStowage;
 import stowage.Terminal;
 
 public class Boat {
-//Hey this is a boat
 	public int nrOfBays = 4;
-	public int nrOfLayers = 2;
-	public int nrOfRows = 2;
+	public int nrOfLayers = 4;
+	public int nrOfRows = 1;
 //TO DO:: we need the specifications of the boat
 	public static int weightBoat;
-	//create a variable that indicates the stowage, probably a 3D
 	public int[][][] stowage = new int[nrOfLayers][nrOfRows][nrOfBays];
 	
 	public Boat() {
@@ -65,7 +63,6 @@ public class Boat {
 	public void visitTerminal(Terminal terminal, Boat boat) {
 		CreateStowage.removeExport(boat, terminal);
 		CreateStowage.loadImport(boat, terminal);
-		//showStowage();
 	}
 	
 }

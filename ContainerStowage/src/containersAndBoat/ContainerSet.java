@@ -1,5 +1,6 @@
 package containersAndBoat;
 import containersAndBoat.Container;
+import stowage.CreateStowage;
 import stowage.Terminal;
 import stowage.TerminalSet;
 
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ContainerSet {
-	public static int nrOfContainers = 5;
+	public static int nrOfContainers = 25;
 	public static double probOfExport = 0.5;
 	public static double probOf20foot = 0.5;
 	public static List<Container> containers = new ArrayList<>();
@@ -62,6 +63,7 @@ public class ContainerSet {
 				totalTransported++;
 			}
 		}
-		System.out.printf("In total there have been transported "+totalTransported+" containers..\n");
+		System.out.print("RESULT:\n");
+		System.out.printf("Total transported: "+totalTransported+" containers, total shifted: "+CreateStowage.overstowageCount+" containers, Objective: ..\n");
 	}
 }

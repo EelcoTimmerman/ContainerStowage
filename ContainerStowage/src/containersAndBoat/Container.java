@@ -139,8 +139,11 @@ public class Container {
 					if(boat.stowage[i][j][k] == 0 && boat.stowage[i][j][k+1] == 0) {
 						count++;
 					}
+					if(i == 0 || (i != 0 && boat.stowage[i-1][j][k] != 0 && boat.stowage[i-1][j][k+1] != 0) ) {
+							count++;
+						}
 				}
-			 if(count == 2) {
+			 if(count == 3) {
 				 return true;
 			 }else {
 				 return false;

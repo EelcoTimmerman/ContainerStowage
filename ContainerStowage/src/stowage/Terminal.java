@@ -17,7 +17,7 @@ public class Terminal {
 	}
 	
 	public void talk() {
-		System.out.printf("Hey I am terminal "+ this.id + ", the loading sequence at this terminal is as follows: %n");
+		System.out.printf("The boat is currently at terminal "+ this.id + ", the loading sequence at this terminal is as follows: %n");
 	}
 	
 	public void unloadExport(Container c) {
