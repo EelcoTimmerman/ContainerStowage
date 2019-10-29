@@ -6,6 +6,7 @@ import containersAndBoat.ContainerSet;
 import stowage.CreateStowage;
 import stowage.TerminalSet;
 import stowage.Terminal;
+import stowage.OverstowageCalculator;
 
 public class Main {
 //Hey this is my first line, but its a comment so it doesnt do anyhting...
@@ -19,18 +20,10 @@ public class Main {
 		List <Container> containers = cset.getContainers();
 		CreateStowage stowagePlanner = new CreateStowage(containers, boat);
 		stowagePlanner.createInitialStowage();
-		for(Terminal t: TerminalSet.terminals) {
-			if(t.id == 0 ) {
-				System.out.printf("Hey I am terminal 0, the starting stowage is: %n");
-				boat.showStowage();
-				cset.allTellPosition();
-				continue;
-			}		
-			t.talk();
-			boat.visitTerminal(t, boat);
-			cset.allTellPosition();
-		}
-		cset.reportPerformance();
+		//calculate overstowage route 1.
+		OverstowageCalculator Ocalc = new OverstowageCalculator(1,boat);
+		//calculate overstowage in case of route 2.
+
 	}
 
 

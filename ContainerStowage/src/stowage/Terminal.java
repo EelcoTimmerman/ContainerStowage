@@ -16,6 +16,10 @@ public class Terminal {
 		this.id = id;
 	}
 	
+	public void report() {
+		
+	}
+	
 	public void talk() {
 		System.out.printf("The boat is currently at terminal "+ this.id + ", the loading sequence at this terminal is as follows: %n");
 	}

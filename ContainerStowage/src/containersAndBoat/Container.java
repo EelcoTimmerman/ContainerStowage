@@ -55,7 +55,7 @@ public class Container {
 		public boolean findFeasibleLocation(Boat boat){ // does not meet all feasibility criteria yet
 			int cId = this.id +1;
 			outerloop:
-			for(int i = 0; i< boat.nrOfLayers;i++) {
+			for(  int i = 0; i< boat.nrOfLayers;i++) {
 				  for(int j = 0; j< boat.nrOfRows;j++) {
 					  for(int k = 0; k< boat.nrOfBays;k++) {
 							  if(this.type == ContainerType.TWENTY) {
@@ -74,7 +74,6 @@ public class Container {
 									  updateLocationOnBarge(i,j,k);
 									  transported = true;
 									  break outerloop;
-
 								  }
 								  
 							  }

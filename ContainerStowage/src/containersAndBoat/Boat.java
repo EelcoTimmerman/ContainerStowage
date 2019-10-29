@@ -5,9 +5,9 @@ import stowage.CreateStowage;
 import stowage.Terminal;
 
 public class Boat {
-	public int nrOfBays = 4;
-	public int nrOfLayers = 4;
-	public int nrOfRows = 1;
+	public int nrOfBays = 6;
+	public int nrOfLayers = 3;
+	public int nrOfRows = 3;
 //TO DO:: we need the specifications of the boat
 	public static int weightBoat;
 	public int[][][] stowage = new int[nrOfLayers][nrOfRows][nrOfBays];
