@@ -13,8 +13,8 @@ public class Boat {
 	public int[][][] stowage = new int[nrOfLayers][nrOfRows][nrOfBays];
 	
 	public Boat() {
-		System.out.print("Initial stowage: \n");
-		showStowage();
+		System.out.print("A boat has been created \n");
+		//showStowage();
 	}
 	
 	public void showStowage() {
@@ -60,9 +60,9 @@ public class Boat {
 		stowage[layer][row][bay + 1] = 0;
 	}
 	
-	public void visitTerminal(Terminal terminal, Boat boat) {
-		CreateStowage.removeExport(boat, terminal);
-		CreateStowage.loadImport(boat, terminal);
+	public void visitTerminal(Terminal terminal, Boat boat, List<Container> containers) {
+		CreateStowage.removeExport(boat, terminal, containers);
+		CreateStowage.loadImport(boat, terminal, containers);
 	}
 	
 	

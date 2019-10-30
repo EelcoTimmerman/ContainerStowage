@@ -23,7 +23,7 @@ public class TerminalSet {
 		}
 	}
 	
-	public void decideRoutes() {		
+	public int[][] decideRoutes() {		
 		if(nrOfRoutes> nrOfTerminals) {
 			System.out.print("Error, creation of this amount of routes not possible, there are not enough terminals..");
 		}
@@ -64,6 +64,7 @@ public class TerminalSet {
 				}
 				System.out.print(" 0\n");			
 		}
+		return this.routes;
 	}
 	
 	public boolean alreadyWasFirstIndex(int n) {

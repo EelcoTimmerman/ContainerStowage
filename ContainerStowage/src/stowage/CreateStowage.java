@@ -26,7 +26,7 @@ public class CreateStowage {
 		 }
 	 }
 	 
-	 public static void  removeExport(Boat boat, Terminal terminal) {
+	 public static void  removeExport(Boat boat, Terminal terminal, List<Container> containers) {
 		 for(int i = boat.nrOfLayers -1;i>-1;i--) {
 			 for(Container c: containers) {
 				 if(c.export&& c.destination == terminal && c.isOnBarge && c.isInLayer(i)) {
@@ -103,7 +103,7 @@ public class CreateStowage {
 		 }
 	 }
 	 
-	 public static void loadImport(Boat boat, Terminal terminal) {
+	 public static void loadImport(Boat boat, Terminal terminal, List<Container> containers) {
 		 //first load the shifted containers..		 
 		 for (Iterator<Container> iterator = terminal.shiftedContainers.iterator(); iterator.hasNext();) {
 			    Container c = iterator.next();
