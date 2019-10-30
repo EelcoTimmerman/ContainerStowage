@@ -14,6 +14,7 @@ public class Main {
 	public static void main(String[] args) {
 		//this is the loading part
 		TerminalSet terminals = new TerminalSet();
+		terminals.decideRoutes();
 		Boat boat = new Boat();
 		ContainerSet cset = new ContainerSet();
 		cset.createSetOfContainers();
@@ -21,7 +22,8 @@ public class Main {
 		CreateStowage stowagePlanner = new CreateStowage(containers, boat);
 		stowagePlanner.createInitialStowage();
 		//calculate overstowage route 1.
-		OverstowageCalculator Ocalc = new OverstowageCalculator(1,boat);
+		OverstowageCalculator Ocalc = new OverstowageCalculator(boat, terminals.routes, terminals.terminals);
+		Ocalc.reportRoute(0);
 		//calculate overstowage in case of route 2.
 
 	}

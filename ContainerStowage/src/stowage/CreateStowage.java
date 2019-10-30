@@ -39,7 +39,7 @@ public class CreateStowage {
 					 System.out.printf("Unloading container "+realID+" from position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
 					 c.removeFromBarge(boat);
 					 terminal.unloadExport(c);
-					 boat.showStowage();
+					 //boat.showStowage();
 				 }
 			 }
 		 }
@@ -111,7 +111,7 @@ public class CreateStowage {
 			         iterator.remove();
 					 int realID = c.id+1;
 					 System.out.printf("Loading back shifted container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
-			         boat.showStowage();
+			         //boat.showStowage();
 			    }else {
 			    	System.out.print("Ünable to put back shifted container, quite a bit a mistake sucker..");
 			    }
@@ -125,7 +125,7 @@ public class CreateStowage {
 			        iterator2.remove();
 			        terminal.loadedImport.add(c);
 			        System.out.printf("Loading container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
-			        boat.showStowage();
+			        //boat.showStowage();
 			    }
 			}
 
