@@ -16,15 +16,14 @@ public class Main {
 		TerminalSet terminals = new TerminalSet();
 		int[][] routes = terminals.decideRoutes();
 		Boat boat = new Boat();
-		ContainerSet cset = new ContainerSet();
+		ContainerSet cset = new ContainerSet(terminals);
 		cset.createSetOfContainers();
 		List <Container> containers = cset.getContainers();
 		CreateStowage stowagePlanner = new CreateStowage(containers, boat);
 		stowagePlanner.createInitialStowage();
 		//This is the moment where a boat, a set of containers, a set of terminals should be copied
-		boat.showStowage();
 		for(int r = 0;r<TerminalSet.nrOfRoutes;r++) {
-			OverstowageCalculator Ocalc = new OverstowageCalculator(terminals.terminals, boat, containers, routes);
+			OverstowageCalculator Ocalc = new OverstowageCalculator(terminals.terminals, boat, containers, routes, terminals, stowagePlanner);
 			Ocalc.reportRoute(r);
 		}
 

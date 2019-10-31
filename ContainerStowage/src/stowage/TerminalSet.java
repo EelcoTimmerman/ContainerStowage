@@ -5,11 +5,11 @@ import java.util.List;
 import stowage.Terminal;
 
 public class TerminalSet {
-	public static int nrOfTerminals = 5; // this is including the dryport
+	public static int nrOfTerminals = 3; // this includes the dryport
 	public static int nrOfRoutes = 2;
 	public int[] firstIndices = new int[nrOfRoutes];
 	public int[][] routes = new int[nrOfRoutes][nrOfTerminals-1];
-	public static List<Terminal> terminals = new ArrayList<>();
+	public List<Terminal> terminals = new ArrayList<>();
 	
 	public TerminalSet() {
 		int id = 0;
@@ -76,7 +76,7 @@ public class TerminalSet {
 		return false;
 	}
 	
-	public static Terminal getTerminal(int i) {
+	public Terminal getTerminal(int i) {
 		for(Terminal t: terminals) {
 			if(t.id == i) {
 				return t;

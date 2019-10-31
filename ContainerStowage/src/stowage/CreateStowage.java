@@ -9,9 +9,9 @@ import java.util.List;
 
 public class CreateStowage {
 //take as input the set of containers that has been created,
-	 public static List<Container> containers;
+	 public List<Container> containers;
 	 public Boat boat;
-	 public static int overstowageCount = 0;
+	 public int overstowageCount = 0;
 	 
 	 public CreateStowage(List<Container> container, Boat boat) {
 		 this.containers = container;
@@ -26,16 +26,16 @@ public class CreateStowage {
 		 }
 	 }
 	 
-	 public static void  removeExport(Boat boat, Terminal terminal, List<Container> containers) {
+	 public void  removeExport(Boat boat, Terminal terminal, List<Container> containers) {
 		 for(int i = boat.nrOfLayers -1;i>-1;i--) {
 			 for(Container c: containers) {
 				 if(c.export&& c.destination == terminal && c.isOnBarge && c.isInLayer(i)) {
+					 int realID = c.id +1;
 					 if(hasContainersAbove(c,boat)) {
-						 int realID = c.id +1;
-						 System.out.print("Start shifting containers to reach container "+realID+ " in position " + c.zLoc + c.yLoc + c.xLoc+"\n");
+						 int realiD = c.id +1;
+						 System.out.print("Start shifting containers to reach container "+realiD+ " in position " + c.zLoc + c.yLoc + c.xLoc+"\n");
 						 shiftContainersAbove(c, boat, terminal);
 					 }
-					 int realID = c.id+1;
 					 System.out.printf("Unloading container "+realID+" from position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
 					 c.removeFromBarge(boat);
 					 terminal.unloadExport(c);
@@ -45,16 +45,20 @@ public class CreateStowage {
 		 }
 	 }
 	 
-	 public static boolean hasContainersAbove(Container c, Boat boat) {	 
-		 if(c.zLoc == boat.nrOfLayers -1) {
+	 public boolean hasContainersAbove(Container c, Boat boat) {	 
+		 if(c.isOnBarge == true && c.zLoc< boat.nrOfLayers - 1 ) {
+			 if(boat.stowage[c.zLoc+1][c.yLoc][c.xLoc] >0) {
+				 return true;
+			 }else if(c.type == ContainerType.TWENTY&& c.xLoc>0&&boat.stowage[c.zLoc+1][c.yLoc][c.xLoc-1] == 2) {
+				 return true;
+			 }else return false;
+		 }else {
 			 return false;
 		 }
-		 if(c.zLoc< boat.nrOfLayers - 1 && boat.stowage[c.zLoc+1][c.yLoc][c.xLoc] >0) {
-			 return true;
-		 }else return false;
+
 	 }
 	 
-	 public static void shiftContainersAbove(Container c, Boat boat, Terminal terminal) {
+	 public void shiftContainersAbove(Container c, Boat boat, Terminal terminal) {
 		int firstX = c.xLoc;
 		int Y = c.yLoc;
 		int secondX = c.xLoc+1;
@@ -84,7 +88,7 @@ public class CreateStowage {
 		
 	 }
 	 
-	 public static void clearPile(Boat boat, Terminal terminal, int z, int y, int x) {
+	 public void clearPile(Boat boat, Terminal terminal, int z, int y, int x) {
 		 for(int i = z + 1;i<boat.nrOfLayers - 1;i++) {
 				 if(boat.stowage[i][y][x] == 1) {
 					 for(Container c: containers) {
@@ -103,7 +107,7 @@ public class CreateStowage {
 		 }
 	 }
 	 
-	 public static void loadImport(Boat boat, Terminal terminal, List<Container> containers) {
+	 public void loadImport(Boat boat, Terminal terminal, List<Container> containers) {
 		 //first load the shifted containers..		 
 		 for (Iterator<Container> iterator = terminal.shiftedContainers.iterator(); iterator.hasNext();) {
 			    Container c = iterator.next();
@@ -120,17 +124,21 @@ public class CreateStowage {
 		 for (Iterator<Container> iterator2 = terminal.unloadedImport.iterator(); iterator2.hasNext();) {
 			    Container c = iterator2.next();
 				int realID = c.id+1;
-		        System.out.printf("Trying to load container "+realID+"...\n");
+		        //System.out.printf("Trying to load container "+realID+"...\n");
 			    if(c.findFeasibleLocation(boat)) {
 			        iterator2.remove();
 			        terminal.loadedImport.add(c);
-			        System.out.printf("Loading container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
+			        //System.out.printf("Loading container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
 			        //boat.showStowage();
 			    }
 			}
 
 	 }
 	 
+	 public int countShifts(Terminal terminal) {
+		 int shifts = terminal.shiftedContainers.size();
+		 return shifts;
+	 }
 	 
 
 
