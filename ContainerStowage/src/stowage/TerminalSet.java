@@ -5,8 +5,8 @@ import java.util.List;
 import stowage.Terminal;
 
 public class TerminalSet {
-	public static int nrOfTerminals = 5; // this includes the dryport
-	public static int nrOfRoutes = 3;
+	public static int nrOfTerminals = 3; // this includes the dryport
+	public static int nrOfRoutes = 1;
 	public static int[] firstIndices = new int[nrOfRoutes];
 	public static int[][] routes = new int[nrOfRoutes][nrOfTerminals-1];
 	public static double[] routeProb= new double [nrOfRoutes];

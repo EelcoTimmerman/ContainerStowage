@@ -4,6 +4,7 @@ import containersAndBoat.Container;
 import containersAndBoat.ContainerSet;
 import containersAndBoat.Boat;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,8 +14,9 @@ public class CreateStowage {
 	 public static List<Container> fixedContainers;
 	 public static Boat boat;
 	 
-	 public CreateStowage(List<Container> container, Boat boat) {
-		 fixedContainers = container;
+	 public CreateStowage(List<Container> containers, Boat boat) {
+		 containers.sort(Comparator.comparing(Container::getWeight));
+		 fixedContainers = containers;
 		 this.boat = boat;
 	 }
 	 	 
@@ -39,7 +41,7 @@ public class CreateStowage {
 					 System.out.printf("Unloading container "+realID+" from position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
 					 c.removeFromBarge(boat);
 					 terminal.unloadExport(c);
-					 //boat.showStowage();
+					 boat.showStowage();
 				 }
 			 }
 		 }
@@ -61,25 +63,20 @@ public class CreateStowage {
 	 public static void shiftContainersAbove(Container c, Boat boat, Terminal terminal, List<Container> copyContainers) {
 		int firstX = c.xLoc;
 		int Y = c.yLoc;
-		int secondX = c.xLoc+1;
 		int layer = c.zLoc;
 		for(int i = boat.nrOfLayers -1;i>layer;i--) {
 			if(boat.stowage[i][Y][firstX] > 0) {
 				//clear container with this coordinate
 				for(Container con: copyContainers) {
-					if(con.zLoc == i && con.yLoc == Y && con.xLoc == firstX ||
-							con.zLoc == i && con.yLoc == Y && con.xLoc == firstX -1 && con.type == ContainerType.FORTY) {
+					if(con.zLoc == i && con.yLoc == Y && con.xLoc == firstX) {
 						if(con.export && con.destination == terminal) {
 							System.out.print("Error.. an export container is shifted, while it should already have been unloaded.. sukkel");
 						}
 						int realID = con.id+1;
 						System.out.printf("Shifting container "+realID+" from position: " + con.zLoc + con.yLoc + con.xLoc +"\n");
-						con.removeFromBarge(boat);
+						con.shiftFromBarge(boat);
+						terminal.addToShiftAndUnloadedImport(con);
 						boat.showStowage();
-						terminal.addToShift(con);
-						if(c.type == ContainerType.FORTY) {
-							clearPile(boat,terminal,i,Y,secondX, copyContainers);
-						}
 					}
 				}
 			}
@@ -95,7 +92,7 @@ public class CreateStowage {
 							System.out.printf("Shifting container "+realID+" from position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
 							c.removeFromBarge(boat);
 							boat.showStowage();
-							terminal.addToShift(c);
+							terminal.addToShiftAndUnloadedImport(c);
 						 }					 
 					}
 				 }
@@ -104,41 +101,82 @@ public class CreateStowage {
 		 }
 	 }
 	 
-	 public static void loadImport(Boat boat, Terminal terminal, List<Container> containers) {
-		 //first load the shifted containers..		 
-		 for (Iterator<Container> iterator = terminal.shiftedContainers.iterator(); iterator.hasNext();) {
-			    Container c = iterator.next();
-			    if(c.findFeasibleLocation(boat)) {
-			         iterator.remove();
-					 int realID = c.id+1;
-					 System.out.printf("Loading back shifted container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
-			         //boat.showStowage();
-			    }else {
-			    	System.out.print("Ünable to put back shifted container, quite a bit a mistake sucker..");
-			    }
+	 public static int shiftBack(Boat boat, Terminal terminal, Container c){
+		if(c.shifted == false) {
+			System.out.printf("Errorrrrr, this is not a shifted container..\n");
+		}
+		int realID = c.id+1;
+		c.shifted =false;
+     	if(c.findFeasibleLocation(boat)== false){
+			System.out.printf("Errorrrrr, unable to shift back container!\n");
+     	}
+		System.out.printf("Shifting back container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
+     	boat.showStowage();
+     	return 1;
+	 }
+	 
+	 public static boolean loadImportContainer(Boat boat, Terminal terminal, Container c) {
+			if(c.shifted == true) {
+				System.out.printf("Errorrrrr, this is a shifted container..\n");
 			}
+			int realID = c.id+1;
+	        System.out.printf("Trying to load container "+realID+"...\n");
+	        if(c.findFeasibleLocation(boat)) {
+				terminal.loadedImport.add(c);	
+				System.out.printf("Loading container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
+		     	boat.showStowage();
+		     	return true;
+	        }else {
+				System.out.printf("Unable to load back container "+realID+"\n");
+		     	boat.showStowage();
+	        	return false;
+	        }
+	 }
+	 
+	 public static void loadListOfContainers( List<Container> containers) {
+		 containers.sort(Comparator.comparing(Container::getOrder));
+		 for(Container c: containers) {
+			 c.tellPosition();
+		 }
 		 
-		 for (Iterator<Container> iterator2 = terminal.unloadedImport.iterator(); iterator2.hasNext();) {
-			    Container c = iterator2.next();
-				int realID = c.id+1;
-		        //System.out.printf("Trying to load container "+realID+"...\n");
-			    if(c.findFeasibleLocation(boat)) {
-			        iterator2.remove();
-			        terminal.loadedImport.add(c);
-			        //System.out.printf("Loading container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
-			        //boat.showStowage();
-			    }
-			}
-
+		 
 	 }
 	 
-	 public static int countShifts(Terminal terminal) {
-		 int shifts = terminal.shiftedContainers.size();
-		 return shifts;
+	 public static void loadBoat(Boat boat, Terminal terminal, List<Container> containers) {
+		 //first load the shifted containers..		 		 
+		 int freeSlots = boat.countFreeSlots();
+		 int j = 0;
+		 terminal.unloadedImport.sort(Comparator.comparing(Container::getOrder));
+		 while(freeSlots > terminal.shiftedContainers.size() && terminal.unloadedImport.size() > 0 && j<20) {
+			 for (Iterator<Container> iterator2 = terminal.unloadedImport.iterator(); iterator2.hasNext();) {
+				    Container c = iterator2.next();
+				        if(c.shifted == true) {
+				        	freeSlots -= shiftBack(boat,terminal,c);
+					        iterator2.remove();
+					     	terminal.shiftedContainers.remove(c);
+				        }else {
+				        	if(loadImportContainer(boat, terminal,c)) {
+						        iterator2.remove();
+				        		freeSlots --;
+				        	}
+				        }	
+				        j++;
+				}
+		 }
+		 if(terminal.shiftedContainers.size() != 0) {
+			 System.out.printf("No space anymore for import containers, just loading back shifted ones.\n");
+			 terminal.shiftedContainers.sort(Comparator.comparing(Container::getOrder));
+			 int k=0;
+			 while(terminal.shiftedContainers.size() != 0 && k<20) {
+				 for (Iterator<Container> iterator = terminal.shiftedContainers.iterator(); iterator.hasNext();) {
+					    Container c = iterator.next();
+					    shiftBack(boat, terminal, c); //also removes it from 
+				         iterator.remove();
+				 }
+				 k++;
+			 }
+		 }
+
 	 }
-	 
-
-	 
-
 
 }

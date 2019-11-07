@@ -6,7 +6,7 @@ import stowage.Terminal;
 
 public class Boat {
 	public int nrOfBays = 6;
-	public int nrOfLayers = 2;
+	public int nrOfLayers = 3;
 	public int nrOfRows = 1;
 //TO DO:: we need the specifications of the boat
 	public static int weightBoat;
@@ -35,12 +35,11 @@ public class Boat {
 	}
 	
 	public int[][][] getStowage(){
-		return stowage;
-		
+		return stowage;		
 	}
-	
-	public void set20footSpotOccupied(int layer, int row, int bay) {
-		stowage[layer][row][bay] = 1;
+		
+	public void set20footSpotOccupied(int layer, int row, int bay, int weight) {
+		stowage[layer][row][bay] = weight;
 	}
 	
 	public void set40footSpotOccupied(int layer, int row, int bay) {
@@ -63,11 +62,23 @@ public class Boat {
 	public int visitTerminal(Terminal terminal, Boat boat, List<Container> containers) {
 		int shifts = 0;
 		CreateStowage.removeExport(boat, terminal, containers);
-		shifts += CreateStowage.countShifts(terminal);
-		CreateStowage.loadImport(boat, terminal, containers);
+		shifts += terminal.shiftedContainers.size();
+		CreateStowage.loadBoat(boat, terminal, containers);
 		return shifts;
 	}
 	
-	
+	public int countFreeSlots() {
+		int freeSlots = 0;
+		for(int i =0;i<this.nrOfLayers;i++) {
+			for(int j=0;j<this.nrOfRows;j++) {
+				for(int k=0;k<this.nrOfBays;k++) {
+					if(this.stowage[i][j][k] == 0) {
+						freeSlots++;
+					}
+				}
+			}
+		}
+		return freeSlots;
+	}
 	
 }

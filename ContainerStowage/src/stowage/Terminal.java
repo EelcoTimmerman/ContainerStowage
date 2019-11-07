@@ -42,8 +42,9 @@ public class Terminal {
 		unloadedImport.add(c);
 	}
 	
-	public void addToShift(Container c) {
+	public void addToShiftAndUnloadedImport(Container c) {
 		shiftedContainers.add(c);
+		unloadedImport.add(c);
 	}
 	
 	public void removeFromShift(Container c) {

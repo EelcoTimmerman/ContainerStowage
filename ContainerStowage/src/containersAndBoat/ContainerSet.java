@@ -11,7 +11,7 @@ import java.util.Random;
 public class ContainerSet {
 	public static int nrOfContainers = 25;
 	public double probOfExport = 0.5;
-	public double probOf20foot = 0.5;
+	public static double probOf20foot = 1;
 	public TerminalSet tset;
 	public static List<Container> containers = new ArrayList<>();
 	
@@ -40,14 +40,18 @@ public class ContainerSet {
 				tset.terminals.get(ind).initImport(c);
 			}
 			int shh = rand.nextInt(100);
-			if(shh>probOfExport*100) {
-				c.setType(ContainerType.FORTY);
-			}else {
+			if(probOf20foot == 1) {
 				c.setType(ContainerType.TWENTY);
+			}else {
+				c.setType(ContainerType.FORTY);
 			}
-
-			c.weight = n;//This is not the actual weight yet, still need to look for that.
-			//Add this shizzle to the terminals...
+			if(n <= 33) {
+				c.setWeight(1);
+			}else if(n <= 67) {
+				c.setWeight(2);
+			}else {
+				c.setWeight(3);
+			}
 			containers.add(c);
 			}
 	}
@@ -62,15 +66,4 @@ public class ContainerSet {
 		return containers;	
 	}
 	
-	public void reportPerformance() {
-		//do this only at the end..
-			int totalTransported =0;
-		for(Container c: containers) {
-			if(c.transported == true) {
-				totalTransported++;
-			}
-		}
-		System.out.print("RESULT:\n");
-		//System.out.printf("Total transported: "+totalTransported+" containers, total shifted: "+CreateStowage.overstowageCount+" containers, Objective: ..\n");
-	}
 }

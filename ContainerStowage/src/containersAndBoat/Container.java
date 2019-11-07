@@ -1,5 +1,6 @@
 package containersAndBoat;
 import stowage.Terminal;
+import stowage.TerminalSet;
 
 public class Container {
 		public int id;
@@ -12,6 +13,7 @@ public class Container {
 		public boolean isOnBarge;
 		public boolean export;
 		public boolean transported;
+		public boolean shifted;
 
 		
 		public Container(int id) {
@@ -21,22 +23,30 @@ public class Container {
 			zLoc = -1;
 			isOnBarge = false;
 			transported = false;
+			shifted = false;
 		}
 		public void tellPosition() {
 			int rew = id+1;
 			int tId = this.destination.id;
-			if(this.type == ContainerType.TWENTY) {
+			if(this.weight == 1) {
 				if(export) {
-					System.out.printf("Container nr" + rew +", 20foot export to destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
+					System.out.printf("Container nr" + rew +", lightweight export to destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
 				}else {
-					System.out.printf("Container nr" + rew +", 20foot import from destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
+					System.out.printf("Container nr" + rew +", lightweight import from destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
 				}
-			}else{
+			}else if(this.weight == 2){
 				if(export) {
-					System.out.printf("Container nr" + rew +", 40foot export to destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
+					System.out.printf("Container nr" + rew +", mediumweight export to destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
 				}else {
-					System.out.printf("Container nr" + rew +", 40foot import from destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
-				}			}
+					System.out.printf("Container nr" + rew +", mediumweight import from destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
+				}
+			}else {
+				if(export) {
+					System.out.printf("Container nr" + rew +", heavyweight export to destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
+				}else {
+					System.out.printf("Container nr" + rew +", heavyweight import from destination:" + tId +", in position " + zLoc + yLoc + xLoc + "\n");
+				}
+			}
 			
 		}
 		
@@ -54,37 +64,45 @@ public class Container {
 		
 		public boolean findFeasibleLocation(Boat boat){ // does not meet all feasibility criteria yet
 			int cId = this.id +1;
+			//findfeasible block
 			outerloop:
-			for(  int i = 0; i< boat.nrOfLayers;i++) {
+			for(int i = 0; i< boat.nrOfLayers;i++) {
 				  for(int j = 0; j< boat.nrOfRows;j++) {
 					  for(int k = 0; k< boat.nrOfBays;k++) {
-							  if(this.type == ContainerType.TWENTY) {
 								 if( is20Feasible(boat,i,j,k) ) {
-									  boat.set20footSpotOccupied(i,j,k);
+									  boat.set20footSpotOccupied(i,j,k, this.weight);
 									  updateLocationOnBarge(i,j,k);
 									  transported = true;
 									  break outerloop;
 								 }
-							  }else {
-								  if(this.type != ContainerType.FORTY) {
-									  System.out.print("Error noob, this should be a 40 container.");
-								  }
-								  if( is40Feasible(boat,i,j,k) ) {
-									  boat.set40footSpotOccupied(i,j,k);
-									  updateLocationOnBarge(i,j,k);
-									  transported = true;
-									  break outerloop;
-								  }
-								  
-							  }
-							  		if(i==boat.nrOfLayers -1 && j == boat.nrOfRows -1 && k == boat.nrOfBays -1) {
+							  	if(i==boat.nrOfLayers -1 && j == boat.nrOfRows -1 && k == boat.nrOfBays -1) {
 							  			System.out.printf("Container "+cId+" can unfortunately not be taken..how sad\n");
 							  			return false;
-							  		}
+							  	}
 					  }
 				  }  
 			}
 			return true;
+		}
+		
+		public void findFeasibleBlock() {
+			
+		}
+		
+		public int getWeight() {
+			return this.weight;
+		}
+		
+		public int getOrder() {
+			int weight = this.weight*10;
+			int dest = -1;
+			for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {
+				if(this.destination.id == TerminalSet.routes[0][i]) {
+					dest = i;
+				}
+			}
+			int res = weight + dest;
+			return res;
 		}
 		
 		public void updateLocationOnBarge(int i, int j, int k) {
@@ -95,21 +113,20 @@ public class Container {
 		}
 		
 		public void removeFromBarge(Boat barge) {
-			//it should remove the container itself and all containers that are on top of it, if one of the containers on top is an 40 foot container
-			//it should remove that entire pile too. They then should be added to a kind of list that has to be replaced no matter what, cause
-			//otherwise there are containers left at a terminal where they don't belong
-			//furthermore, the removing should start from the top.
-				if(this.type == ContainerType.TWENTY) {
-					barge.set20LocationEmpty(this.zLoc, this.yLoc, this.xLoc);
-				}else {
-					barge.set40LocationEmpty(this.zLoc, this.yLoc, this.xLoc);
-				}
+				barge.set20LocationEmpty(this.zLoc, this.yLoc, this.xLoc);
 				this.xLoc = -1;
 				this.yLoc = -1;
 				this.zLoc = -1;
 				this.isOnBarge = false;
-
-
+		}
+		
+		public void shiftFromBarge(Boat barge) {
+			barge.set20LocationEmpty(this.zLoc, this.yLoc, this.xLoc);
+			this.shifted = true;
+			this.xLoc = -1;
+			this.yLoc = -1;
+			this.zLoc = -1;
+			this.isOnBarge = false;
 		}
 		
 		 public boolean is20Feasible(Boat boat, int i, int j, int k) {
@@ -117,36 +134,14 @@ public class Container {
 					if(boat.stowage[i][j][k] == 0) {
 						count++;
 					}
-					if( (i==0) || (i>0 && boat.stowage[i-1][j][k] == 1) ) {
+					if( (i==0) || (i>0 && boat.stowage[i-1][j][k] >= this.weight) ) {
 						count++;
-					}
-
-			
+					}		
 				if(count == 2) {
 					return true;
 				}else {
 					return false;
 				}
-		 }
-		 
-		 public boolean is40Feasible(Boat boat, int i, int j, int k) {
-				int count =0;
-			 if(k < boat.nrOfBays -1) {
-					if(k==0 || k % 2 == 0) {
-						count++;
-					}					
-					if(boat.stowage[i][j][k] == 0 && boat.stowage[i][j][k+1] == 0) {
-						count++;
-					}
-					if(i == 0 || (i != 0 && boat.stowage[i-1][j][k] != 0 && boat.stowage[i-1][j][k+1] != 0) ) {
-							count++;
-						}
-				}
-			 if(count == 3) {
-				 return true;
-			 }else {
-				 return false;
-			 }
 		 }
 		 
 		 public boolean isInLayer(int i) {

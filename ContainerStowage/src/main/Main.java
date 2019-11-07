@@ -10,7 +10,6 @@ import stowage.OverstowageCalculator;
 
 public class Main {
 //Hey this is my first line, but its a comment so it doesnt do anyhting...
-	
 	public static void main(String[] args) {
 		TerminalSet terminals = new TerminalSet();
 		Boat boat = new Boat();
