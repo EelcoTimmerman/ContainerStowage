@@ -5,29 +5,29 @@ import java.util.List;
 import stowage.Terminal;
 
 public class TerminalSet {
-	public static int nrOfTerminals = 3; // this includes the dryport
-	public static int nrOfRoutes = 2;
-	public int[] firstIndices = new int[nrOfRoutes];
-	public int[][] routes = new int[nrOfRoutes][nrOfTerminals-1];
-	public List<Terminal> terminals = new ArrayList<>();
+	public static int nrOfTerminals = 5; // this includes the dryport
+	public static int nrOfRoutes = 3;
+	public static int[] firstIndices = new int[nrOfRoutes];
+	public static int[][] routes = new int[nrOfRoutes][nrOfTerminals-1];
+	public static double[] routeProb= new double [nrOfRoutes];
+	public static List<Terminal> terminals = new ArrayList<>();
 	
 	public TerminalSet() {
 		int id = 0;
+		decideRoutes();
+		decideRouteProbabilities();
 		for(int i = 0; i<nrOfTerminals; i++) {
 			Terminal terminal = new Terminal(id);
 			id++;
 			terminals.add(terminal);
 		}	
-		for(int i =0;i<nrOfRoutes;i++) {
-			firstIndices[i]=-1;
-		}
 	}
 	
-	public int[][] decideRoutes() {		
+	public void decideRoutes() {		
 		if(nrOfRoutes> nrOfTerminals) {
 			System.out.print("Error, creation of this amount of routes not possible, there are not enough terminals..");
 		}
-		Random rand = new Random();
+		Random rand = new Random(1000);
 		for(int i = 0; i<nrOfRoutes;i++) {
 			int var = i+1;
 			System.out.printf("Route "+var+": \n");
@@ -41,11 +41,13 @@ public class TerminalSet {
 				for(int k=0; k<nrOfTerminals - 1;k++) {
 					if(k == 0) {
 						int index = rand.nextInt(termlist.size());
-						while(alreadyWasFirstIndex(index)) {
+						int ui = 0;
+						while(alreadyWasFirstIndex(index) && ui <1000) {
 							index = rand.nextInt(termlist.size());
 							if(alreadyWasFirstIndex(index) == false) {
 								break;
 							}
+							ui++;
 						}
 						firstIndices[i] =index;
 						int nextTerm = termlist.get(index);
@@ -64,8 +66,8 @@ public class TerminalSet {
 				}
 				System.out.print(" 0\n");			
 		}
-		return this.routes;
 	}
+	
 	
 	public boolean alreadyWasFirstIndex(int n) {
 		for(int i=0;i<nrOfRoutes;i++) {
@@ -76,13 +78,18 @@ public class TerminalSet {
 		return false;
 	}
 	
-	public Terminal getTerminal(int i) {
-		for(Terminal t: terminals) {
-			if(t.id == i) {
-				return t;
-			}
+	public static void decideRouteProbabilities() {
+		int i =0;
+		while(i< nrOfRoutes) {
+			double index = (100/nrOfRoutes);
+			routeProb[i] = index/100;
+			i++;
 		}
-		return terminals.get(0);
+		for(int j = 0; j< nrOfRoutes;j++) {
+			System.out.printf("route"+j+" prob: "+ routeProb[j] +"\n");
+
+		}
 	}
+
 	
 }

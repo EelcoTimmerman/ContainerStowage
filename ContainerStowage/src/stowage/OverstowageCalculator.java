@@ -5,23 +5,21 @@ import java.util.List;
 import containersAndBoat.Boat;
 import stowage.TerminalSet;
 import containersAndBoat.ContainerSet;
+import containersAndBoat.ContainerType;
 import containersAndBoat.Container;
 
 public class OverstowageCalculator {
-	public int nrOfTerminals;
-	public int route;
 	public Boat boatCopy;
-	public TerminalSet tset;
 	public List<Terminal> terminalsCopy = new ArrayList<>();
 	public List<Container> containersCopy = new ArrayList<>();
-	public int[][] routes = new int[TerminalSet.nrOfRoutes][TerminalSet.nrOfTerminals];
 	public int overstowage;
+	public static double shiftCost = 0.1;
+	public int importedTEU = 0;
 	
-	public OverstowageCalculator(List<Terminal> terminals, Boat boat, List<Container> containers, int[][] routes, TerminalSet ter, CreateStowage planner){		
-		this.tset = ter;
+	public OverstowageCalculator(List<Terminal> terminals, Boat boat, List<Container> containers, int[][] routes){		
 		copyTerminals(terminals);
 		copyContainers(containers);		
-		this.boatCopy = new Boat(planner);
+		this.boatCopy = new Boat();
 		for(int z = 0;z<boat.nrOfLayers;z++) {
 			for(int y = 0;y< boat.nrOfRows;y++) {
 				for(int x=0;x<boat.nrOfBays;x++) {
@@ -29,7 +27,6 @@ public class OverstowageCalculator {
 				}
 			}
 		}
-		this.routes = routes;
 		this.overstowage = 0;
 	}
 	
@@ -60,16 +57,21 @@ public class OverstowageCalculator {
 			  cCopy.weight = c.weight;
 			  cCopy.xLoc = c.xLoc;
 			  cCopy.yLoc = c.yLoc;
-			  cCopy.zLoc = c.zLoc;			 
+			 //extra line just for trying
+			  cCopy.zLoc = c.zLoc;
 			  this.containersCopy.add(cCopy);
 		}
+	}
+	
+	public double addedValue() {
+		return (importedTEU - shiftCost*overstowage);
 	}
 	
 	public void reportRoute(int r) {	
 		int route = r+1;
 		System.out.printf("This is the case of route "+route+":\n");
 		for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {		
-		int index = routes[r][i];
+		int index = TerminalSet.routes[r][i];
 		for(Terminal t: terminalsCopy) {
 			if(t.id == index) {
 				if(t.id == 0) {

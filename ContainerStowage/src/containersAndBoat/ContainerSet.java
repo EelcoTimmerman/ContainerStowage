@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Random;
 
 public class ContainerSet {
-	public int nrOfContainers = 25;
+	public static int nrOfContainers = 25;
 	public double probOfExport = 0.5;
 	public double probOf20foot = 0.5;
 	public TerminalSet tset;
-	public List<Container> containers = new ArrayList<>();
+	public static List<Container> containers = new ArrayList<>();
 	
 	public ContainerSet (TerminalSet terminal) {
 		this.tset = terminal;
