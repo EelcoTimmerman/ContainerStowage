@@ -15,7 +15,7 @@ public class CreateStowage {
 	 public static Boat boat;
 	 
 	 public CreateStowage(List<Container> containers, Boat boat) {
-		 containers.sort(Comparator.comparing(Container::getWeight));
+		 containers.sort(Comparator.comparing(Container::getOrder));
 		 fixedContainers = containers;
 		 this.boat = boat;
 	 }
@@ -51,9 +51,9 @@ public class CreateStowage {
 		 if(c.isOnBarge == true && c.zLoc< boat.nrOfLayers - 1 ) {
 			 if(boat.stowage[c.zLoc+1][c.yLoc][c.xLoc] >0) {
 				 return true;
-			 }else if(c.type == ContainerType.TWENTY&& c.xLoc>0&&boat.stowage[c.zLoc+1][c.yLoc][c.xLoc-1] == 2) {
-				 return true;
-			 }else return false;
+			 }else {
+				 return false;
+			 }
 		 }else {
 			 return false;
 		 }

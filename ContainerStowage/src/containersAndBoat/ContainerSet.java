@@ -31,6 +31,7 @@ public class ContainerSet {
 			int ind = rand.nextInt(tset.nrOfTerminals -1) + 1; // cs worden verdeeld over term 1--T
 			c.setDestination(tset.terminals.get(ind));
 			int n = rand.nextInt(100);
+			int rweight = rand.nextInt(100);
 			if(n>probOfExport*100) { //This can be found in fazi's paper
 				c.export = true;
 				//need to be added to the export list of the terminal
@@ -45,9 +46,9 @@ public class ContainerSet {
 			}else {
 				c.setType(ContainerType.FORTY);
 			}
-			if(n <= 33) {
+			if(rweight <= 33) {
 				c.setWeight(1);
-			}else if(n <= 67) {
+			}else if(rweight <= 67) {
 				c.setWeight(2);
 			}else {
 				c.setWeight(3);

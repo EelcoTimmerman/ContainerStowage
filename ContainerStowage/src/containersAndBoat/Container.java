@@ -64,9 +64,8 @@ public class Container {
 		
 		public boolean findFeasibleLocation(Boat boat){ // does not meet all feasibility criteria yet
 			int cId = this.id +1;
-			//findfeasible block
 			outerloop:
-			for(int i = 0; i< boat.nrOfLayers;i++) {
+			for(int i = 0; i< Boat.nrOfLayers;i++) {
 				  for(int j = 0; j< boat.nrOfRows;j++) {
 					  for(int k = 0; k< boat.nrOfBays;k++) {
 								 if( is20Feasible(boat,i,j,k) ) {
@@ -85,23 +84,111 @@ public class Container {
 			return true;
 		}
 		
-		public void findFeasibleBlock() {
+		public boolean findFeasibleLocationInBlock(Boat boat, int block) {
+			int rowstart = 0;
+			int rowend = Boat.nrOfRows;
+			int baystart = 0;
+			int bayend = Boat.nrOfBays;
+			if(block == 1) {
+				System.out.printf("Looking for a slot in block 1\n");
+				if(boat.baysAreEven()) {
+					baystart =  Boat.nrOfBays/2;
+				}else {
+					baystart =  Boat.nrOfRows/2 +1;
+				}
+			}
+			if(block == 2) {
+				System.out.printf("Looking for a slot in block 2\n");
+				if(boat.rowsAreEven()) {
+					rowstart =  Boat.nrOfRows/2;
+				}else {
+					rowstart =  Boat.nrOfRows/2 +1;
+				}
+			}
+			if(block == 3) {
+				System.out.printf("Looking for a slot in block 3\n");
+				bayend = Boat.nrOfBays/2;
+			}
+			if(block == 4) {
+				System.out.printf("Looking for a slot in block 4\n");
+				rowend = Boat.nrOfRows/2;
+			}
+			if(block == 5) {
+				System.out.printf("Looking for a slot in block 5\n");
+				if(boat.baysAreEven()) {
+					baystart =  Boat.nrOfBays/2;
+				}else {
+					baystart =  Boat.nrOfRows/2 +1;
+				}
+				rowend = Boat.nrOfRows/2;
+			}
+			if(block == 6) {
+				System.out.printf("Looking for a slot in block 6\n");
+				if(boat.rowsAreEven()) {
+					rowstart =  Boat.nrOfRows/2;
+				}else {
+					rowstart =  Boat.nrOfRows/2 +1;
+				}
+				if(boat.baysAreEven()) {
+					baystart =  Boat.nrOfBays/2;
+				}else {
+					baystart =  Boat.nrOfRows/2 +1;
+				}
+			}
+			if(block == 7) {
+				System.out.printf("Looking for a slot in block 7\n");
+				bayend = Boat.nrOfBays/2;
+				if(boat.rowsAreEven()) {
+					rowstart =  Boat.nrOfRows/2;
+				}else {
+					rowstart =  Boat.nrOfRows/2 +1;
+				}
+			}
+			if(block == 8) {
+				System.out.printf("Looking for a slot in block 8\n");
+				rowend = Boat.nrOfRows/2;
+				bayend = Boat.nrOfBays/2;
+			}
+			int cId = this.id +1;
+			outerloop:
+			for(int i = 0; i< Boat.nrOfLayers;i++) {
+				  for(int j = rowstart; j< rowend;j++) {
+					  for(int k = baystart; k< bayend;k++) {
+								 if( is20Feasible(boat,i,j,k) ) {
+									  boat.set20footSpotOccupied(i,j,k, this.weight);
+									  updateLocationOnBarge(i,j,k);
+									  transported = true;
+									  break outerloop;
+								 }
+							  	if(i==boat.nrOfLayers -1 && j == boat.nrOfRows -1 && k == boat.nrOfBays -1) {
+							  			System.out.printf("Container "+cId+" can unfortunately not be taken..how sad\n");
+							  			return false;
+							  	}
+					  }
+				  }  
+			}
+			return true;
 			
 		}
 		
-		public int getWeight() {
-			return this.weight;
+		public int getReverseWeight() {
+			return -this.weight;
 		}
 		
 		public int getOrder() {
-			int weight = this.weight*10;
+			int weight = -this.weight*100;
 			int dest = -1;
 			for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {
 				if(this.destination.id == TerminalSet.routes[0][i]) {
 					dest = i;
 				}
 			}
-			int res = weight + dest;
+			int res;
+			if(this.export == true) {
+				res = weight + dest + 50;
+			}else {
+				res = weight + dest;
+			}
 			return res;
 		}
 		
