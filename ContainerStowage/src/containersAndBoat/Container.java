@@ -62,26 +62,16 @@ public class Container {
 			this.destination = terminal;
 		}
 		
-		public boolean findFeasibleLocation(Boat boat){ // does not meet all feasibility criteria yet
-			int cId = this.id +1;
-			outerloop:
-			for(int i = 0; i< Boat.nrOfLayers;i++) {
-				  for(int j = 0; j< boat.nrOfRows;j++) {
-					  for(int k = 0; k< boat.nrOfBays;k++) {
-								 if( is20Feasible(boat,i,j,k) ) {
-									  boat.set20footSpotOccupied(i,j,k, this.weight);
-									  updateLocationOnBarge(i,j,k);
-									  transported = true;
-									  break outerloop;
-								 }
-							  	if(i==boat.nrOfLayers -1 && j == boat.nrOfRows -1 && k == boat.nrOfBays -1) {
-							  			System.out.printf("Container "+cId+" can unfortunately not be taken..how sad\n");
-							  			return false;
-							  	}
-					  }
-				  }  
-			}
-			return true;
+		public boolean findFeasibleLocation(Boat boat){
+			boat.calcWeight();
+			if(boat.checkIfStableWithNewContainer(this.weight)) {
+				findFeasibleLocationInBlock(boat, 0);
+			}else {
+				int block =0;
+				block = boat.whereIsBalanceWeightNeeded(this.weight);
+				findFeasibleLocationInBlock(boat, block);
+			}		
+			return true;	
 		}
 		
 		public boolean findFeasibleLocationInBlock(Boat boat, int block) {
@@ -140,7 +130,7 @@ public class Container {
 				bayend = Boat.nrOfBays/2;
 				if(boat.rowsAreEven()) {
 					rowstart =  Boat.nrOfRows/2;
-				}else {
+				}else{
 					rowstart =  Boat.nrOfRows/2 +1;
 				}
 			}
@@ -149,26 +139,52 @@ public class Container {
 				rowend = Boat.nrOfRows/2;
 				bayend = Boat.nrOfBays/2;
 			}
-			int cId = this.id +1;
+			
+			if(this.weight == 3) {
+				if(this.export){
+					
+				}else {
+					
+				}
+			}else if(this.weight == 2) {
+				if(this.export){
+					
+				}else {
+					
+				}
+			}else {
+				if(this.export){
+					
+				}else {
+					
+				}
+			}			
+			return true;
+		}
+		
+		public boolean placeHeavyImport(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
+			int nrOfRules = 1;
 			outerloop:
-			for(int i = 0; i< Boat.nrOfLayers;i++) {
-				  for(int j = rowstart; j< rowend;j++) {
+			for(int z= 0; z< nrOfRules; z++) {
+				for(int i = 0; i< Boat.nrOfLayers;i++){
+				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-								 if( is20Feasible(boat,i,j,k) ) {
-									  boat.set20footSpotOccupied(i,j,k, this.weight);
-									  updateLocationOnBarge(i,j,k);
-									  transported = true;
-									  break outerloop;
+								 if(z == 0) {
+							  			if(is20Feasible(boat,i,j,k) && this.destination.id ==1 ) {
+											  boat.set20footSpotOccupied(i,j,k, this.weight);
+											  updateLocationOnBarge(i,j,k);
+											  transported = true;
+											  break outerloop;
+										 }
+								 }else if(z == 1) {
+									 
 								 }
-							  	if(i==boat.nrOfLayers -1 && j == boat.nrOfRows -1 && k == boat.nrOfBays -1) {
-							  			System.out.printf("Container "+cId+" can unfortunately not be taken..how sad\n");
-							  			return false;
-							  	}
+
 					  }
 				  }  
+				}
 			}
 			return true;
-			
 		}
 		
 		public int getReverseWeight() {
@@ -223,7 +239,7 @@ public class Container {
 					}
 					if( (i==0) || (i>0 && boat.stowage[i-1][j][k] >= this.weight) ) {
 						count++;
-					}		
+					}
 				if(count == 2) {
 					return true;
 				}else {

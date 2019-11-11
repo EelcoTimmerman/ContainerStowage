@@ -1,7 +1,5 @@
 package stowage;
-import containersAndBoat.ContainerType;
 import containersAndBoat.Container;
-import containersAndBoat.ContainerSet;
 import containersAndBoat.Boat;
 
 import java.util.Comparator;
@@ -12,24 +10,24 @@ import java.util.List;
 public class CreateStowage {
 //take as input the set of containers that has been created,
 	 public static List<Container> fixedContainers;
-	 public static Boat boat;
+	 public Boat initialBoat;
 	 
 	 public CreateStowage(List<Container> containers, Boat boat) {
 		 containers.sort(Comparator.comparing(Container::getOrder));
 		 fixedContainers = containers;
-		 this.boat = boat;
+		 this.initialBoat = boat;
 	 }
 	 	 
 	 public void createInitialStowage() {
 		 for(Container c: fixedContainers) {
 			 if(c.export) {
-				 c.findFeasibleLocation(boat);
+				c.findFeasibleLocation(this.initialBoat);
 			 }
 		 }
 	 }
 	 
 	 public static void  removeExport(Boat boat, Terminal terminal, List<Container> copyContainers) {
-		 for(int i = boat.nrOfLayers -1;i>-1;i--) {
+		 for(int i = Boat.nrOfLayers -1;i>-1;i--) {
 			 for(Container c: copyContainers) {
 				 if(c.export&& c.destination == terminal && c.isOnBarge && c.isInLayer(i)) {
 					 int realID = c.id +1;
@@ -48,7 +46,7 @@ public class CreateStowage {
 	 }
 	 
 	 public static boolean hasContainersAbove(Container c, Boat boat) {	 
-		 if(c.isOnBarge == true && c.zLoc< boat.nrOfLayers - 1 ) {
+		 if(c.isOnBarge == true && c.zLoc< Boat.nrOfLayers - 1 ) {
 			 if(boat.stowage[c.zLoc+1][c.yLoc][c.xLoc] >0) {
 				 return true;
 			 }else {
@@ -64,7 +62,7 @@ public class CreateStowage {
 		int firstX = c.xLoc;
 		int Y = c.yLoc;
 		int layer = c.zLoc;
-		for(int i = boat.nrOfLayers -1;i>layer;i--) {
+		for(int i = Boat.nrOfLayers -1;i>layer;i--) {
 			if(boat.stowage[i][Y][firstX] > 0) {
 				//clear container with this coordinate
 				for(Container con: copyContainers) {
