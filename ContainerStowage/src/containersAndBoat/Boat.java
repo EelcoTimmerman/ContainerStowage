@@ -1,4 +1,5 @@
 package containersAndBoat;
+import java.util.ArrayList;
 import java.util.List;
 
 import stowage.CreateStowage;
@@ -19,6 +20,7 @@ public class Boat {
 	public int q1 = 500; //barge capacity
 	public int q2 = 10; // max left/right weight difference
 	public int q3 = 10;  // front/back weight difference
+	public List<Container> containersOnBoat = new ArrayList<>();
 
 	public static int weightBoat;
 	public int[][][] stowage = new int[nrOfLayers][nrOfRows][nrOfBays];

@@ -22,6 +22,7 @@ public class CreateStowage {
 		 for(Container c: fixedContainers) {
 			 if(c.export) {
 				c.findFeasibleLocation(this.initialBoat);
+				this.initialBoat.containersOnBoat.add(c);
 			 }
 		 }
 	 }
@@ -38,6 +39,7 @@ public class CreateStowage {
 					 }
 					 System.out.printf("Unloading container "+realID+" from position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
 					 c.removeFromBarge(boat);
+					 boat.containersOnBoat.remove(c);
 					 terminal.unloadExport(c);
 					 boat.showStowage();
 				 }
@@ -73,30 +75,13 @@ public class CreateStowage {
 						int realID = con.id+1;
 						System.out.printf("Shifting container "+realID+" from position: " + con.zLoc + con.yLoc + con.xLoc +"\n");
 						con.shiftFromBarge(boat);
+						boat.containersOnBoat.remove(con);
 						terminal.addToShiftAndUnloadedImport(con);
 						boat.showStowage();
 					}
 				}
 			}
 		}
-	 }
-	 
-	 public static void clearPile(Boat boat, Terminal terminal, int z, int y, int x, List<Container> copyContainers) {
-		 for(int i = z + 1;i<boat.nrOfLayers - 1;i++) {
-				 if(boat.stowage[i][y][x] == 1) {
-					 for(Container c: copyContainers) {
-						 if(c.zLoc == i && c.yLoc == y && c.xLoc == x) {
-							int realID = c.id+1;
-							System.out.printf("Shifting container "+realID+" from position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
-							c.removeFromBarge(boat);
-							boat.showStowage();
-							terminal.addToShiftAndUnloadedImport(c);
-						 }					 
-					}
-				 }
-			 
-
-		 }
 	 }
 	 
 	 public static int shiftBack(Boat boat, Terminal terminal, Container c){
@@ -109,7 +94,8 @@ public class CreateStowage {
 			System.out.printf("Errorrrrr, unable to shift back container!\n");
      	}
 		System.out.printf("Shifting back container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
-     	boat.showStowage();
+     	boat.containersOnBoat.add(c);
+		boat.showStowage();
      	return 1;
 	 }
 	 
@@ -121,6 +107,7 @@ public class CreateStowage {
 	        System.out.printf("Trying to load container "+realID+"...\n");
 	        if(c.findFeasibleLocation(boat)) {
 				terminal.loadedImport.add(c);	
+				boat.containersOnBoat.add(c);
 				System.out.printf("Loading container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
 		     	boat.showStowage();
 		     	return true;
