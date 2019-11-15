@@ -73,11 +73,11 @@ public class Boat {
 		stowage[layer][row][bay + 1] = 0;
 	}
 	
-	public int visitTerminal(Terminal terminal, Boat boat, List<Container> containers) {
+	public int visitTerminal(Terminal terminal, int route, Boat boat, List<Container> containers) {
 		int shifts = 0;
 		CreateStowage.removeExport(boat, terminal, containers);
 		shifts += terminal.shiftedContainers.size();
-		CreateStowage.loadBoat(boat, terminal, containers);
+		CreateStowage.loadBoat(boat, route, terminal, containers);
 		return shifts;
 	}
 	

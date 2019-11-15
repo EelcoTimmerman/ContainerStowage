@@ -63,19 +63,19 @@ public class Container {
 			this.destination = terminal;
 		}
 		
-		public boolean findFeasibleLocation(Boat boat){
+		public boolean findFeasibleLocation(Boat boat, int route){
 			boat.calcWeight();
 			if(boat.checkIfStableWithNewContainer(this.weight)) {
-				findFeasibleLocationInBlock(boat, 0);
+				findFeasibleLocationInBlock(boat,route, 0);
 			}else {
 				int block =0;
 				block = boat.whereIsBalanceWeightNeeded(this.weight);
-				findFeasibleLocationInBlock(boat, block);
+				findFeasibleLocationInBlock(boat, route, block);
 			}		
 			return true;	
 		}
 		
-		public boolean findFeasibleLocationInBlock(Boat boat, int block) {
+		public boolean findFeasibleLocationInBlock(Boat boat, int route, int block) {
 			int rowstart = 0;
 			int rowend = Boat.nrOfRows;
 			int baystart = 0;
@@ -142,33 +142,33 @@ public class Container {
 			}
 			if(this.weight == 3) {
 				if(this.export){
-					if(placeHeavyExport(boat, rowstart, rowend, baystart, bayend) == false) {
+					if(placeHeavyExport(boat,route, rowstart, rowend, baystart, bayend) == false) {
 						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
 					}
 				}else {
-					if(placeHeavyImport(boat, rowstart, rowend, baystart, bayend) == false) {
+					if(placeHeavyImport(boat,route, rowstart, rowend, baystart, bayend) == false) {
 						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
 					}				
 				}
 			}
 			if(this.weight == 2) {
 				if(this.export) {
-					if(placeMediumExport(boat, rowstart, rowend, baystart, bayend) == false) {
+					if(placeMediumExport(boat,route, rowstart, rowend, baystart, bayend) == false) {
 						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
 					}
 				}else {
-					if(placeMediumImport(boat, rowstart, rowend, baystart, bayend) == false) {
-							putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
+					if(placeMediumImport(boat,route, rowstart, rowend, baystart, bayend) == false) {
+						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
 					}				
 				}			
 			}
 			if(this.weight == 1){
 				if(this.export){
-					if(placeLightExport(boat, rowstart, rowend, baystart, bayend) == false) {
+					if(placeLightExport(boat,route, rowstart, rowend, baystart, bayend) == false) {
 						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
 					}
 				}else {
-					if(placeLightImport(boat, rowstart, rowend, baystart, bayend) == false) {
+					if(placeLightImport(boat,route, rowstart, rowend, baystart, bayend) == false) {
 						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
 					}					
 				}
@@ -176,47 +176,65 @@ public class Container {
 			return true;
 		}
 		
-		public boolean placeHeavyImport(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
-			if(putContainerOnSameDest(boat, rowstart, rowend,baystart,bayend)) {
+		public boolean placeHeavyImport(Boat boat, int route, int rowstart, int rowend, int baystart, int bayend) {
+			if(putContainerOnSameDest(boat, route,rowstart, rowend,baystart,bayend)) {
 				return true;
 			}else if(putItOnTheBottom(boat, rowstart, rowend,baystart,bayend)) {
+				return true;
+			}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
 				return true;
 			}
 		return false;
 		}
 		
-		public boolean placeHeavyExport(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
-				if(putContainerOnSameDest(boat, rowstart, rowend,baystart,bayend)) {
+		public boolean placeHeavyExport(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
+				if(putContainerOnSameDest(boat,route, rowstart, rowend,baystart,bayend)) {
 					return true;
 				}else if(putItOnTheBottom(boat, rowstart, rowend,baystart,bayend)) {
+					return true;
+				}else if(putContainerOnPileInOrder(boat, route, rowstart, rowend,baystart,bayend)) {
+					return true;
+				}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
 					return true;
 				}			
 			return false;
 		}
 		
-		public boolean placeMediumImport(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
-			if(putContainerOnSameDest(boat, rowstart, rowend,baystart,bayend)) {
+		public boolean placeMediumImport(Boat boat, int route,int rowstart, int rowend, int baystart, int bayend) {
+			if(putContainerOnSameDest(boat,route, rowstart, rowend,baystart,bayend)) {
+				return true;
+			}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
 				return true;
 			}	
 		return false;
 		}
 		
-		public boolean placeMediumExport(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
-			if(putContainerOnSameDest(boat, rowstart, rowend,baystart,bayend)) {
+		public boolean placeMediumExport(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
+			if(putContainerOnSameDest(boat, route, rowstart, rowend,baystart,bayend)) {
+				return true;
+			}else if(putContainerOnPileInOrder(boat, route, rowstart, rowend,baystart,bayend)) {
+				return true;
+			}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
 				return true;
 			}	
 		return false;
 		}
 		
-		public boolean placeLightExport(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
-			if(putContainerOnSameDest(boat, rowstart, rowend,baystart,bayend)) {
+		public boolean placeLightExport(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
+			if(putContainerOnSameDest(boat,route, rowstart, rowend,baystart,bayend)) {
 				return true;
-			}	
+			}else if(putContainerOnPileInOrder(boat, route, rowstart, rowend,baystart,bayend)) {
+				return true;
+			}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
+				return true;
+			}
 		return false;
 		}
 		
-		public boolean placeLightImport(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
-			if(putContainerOnSameDest(boat, rowstart, rowend,baystart,bayend)) {
+		public boolean placeLightImport(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
+			if(putContainerOnSameDest(boat,route, rowstart, rowend,baystart,bayend)) {
+				return true;
+			}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
 				return true;
 			}	
 		return false;
@@ -257,46 +275,276 @@ public class Container {
 			
 		}
 		
-		public boolean putContainerOnSameDest(Boat boat, int rowstart, int rowend, int baystart, int bayend) {		
+		public int getProximityInroute(int route, Container c) {			
+			int index = 100;			
+			if(c.export) {
+				for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {
+					if(TerminalSet.routes[route][i] == c.destination.id) {
+						index = i;
+					}
+				}
+			}else {
+				index = 50;
+			}
+			return index;
+		}
+		
+		public boolean pileBelowIsInOrder(Boat boat, int route, int zlocation, int j, int k) {	
+			int destPrev = 100;
+			int count = 0;
+			for(int i = 0; i < zlocation ;i++) {					
+				for(Container c:boat.containersOnBoat) {
+					if(c.yLoc == j && c.xLoc == k && c.zLoc == i&& getProximityInroute(route, c) <= destPrev)  {
+						if(c.export) {
+							destPrev = getProximityInroute(route, c);
+						}else {
+							destPrev = 50;
+						}
+						count++;
+					}
+				}
+
+			}
+			int ownIndex = -1;
+			if(this.export) {
+				for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {
+					if(TerminalSet.routes[route][i] == this.destination.id) {
+						ownIndex = i;
+					}
+				}
+			}else {
+				ownIndex = 50;
+			}
+			if(count == zlocation && ownIndex <= destPrev) {
+				return true;
+			}
+			return false;
+		}
+		
+		public boolean putContainerOnPileInOrder(Boat boat, int route, int rowstart, int rowend, int baystart, int bayend) {
 			if(this.weight == 1) {
-				if( tryOnLightContainer(boat,rowstart, rowend, baystart,bayend) ) {
-					System.out.print("Putting container "+displayID+" on top of a light one.\n");
+				if( tryOnLightContainerInOrder(boat, route,rowstart, rowend, baystart,bayend) ) {
+					System.out.print("Putting the light container "+displayID+" on top of a light one, the pile is in order.\n");
 					return true;
-				}else if(tryOnMediumContainer(boat,rowstart, rowend, baystart,bayend)){
-					System.out.print("Putting container "+displayID+" on top of a medium one.\n");
+				}else if(tryOnMediumContainerInOrder(boat, route, rowstart, rowend, baystart,bayend)){
+					System.out.print("Putting the light container "+displayID+" on top of a medium one, the pile is in order.\n");
 					return true;
 				}else {
-					if(tryOnHeavyContainerSameDest(boat,rowstart, rowend, baystart,bayend)) {
-						System.out.print("Putting container "+displayID+" on top of a heavy one.\n");
+					if(tryOnHeavyContainerInOrder(boat,route,rowstart, rowend, baystart,bayend)) {
+						System.out.print("Putting the light container "+displayID+" on top of a heavy one, the pile is in order..\n");
 						return true;
 					}
 				}
 			}
 			if(this.weight == 2) {
-				if(tryOnMediumContainer(boat,rowstart, rowend, baystart,bayend) ) {
-					System.out.print("Putting container "+displayID+" on top of a medium one.\n");
+				if(tryOnMediumContainerInOrder(boat,route,rowstart, rowend, baystart,bayend) ) {
+					System.out.print("Putting the medium container "+displayID+" on top of a medium one, the pile is in order..\n");
 					return true;
 				}else {
-					if(tryOnHeavyContainerSameDest(boat,rowstart, rowend, baystart,bayend)) {
-						System.out.print("Putting container "+displayID+" on top of a heavy one.\n");
+					if(tryOnHeavyContainerInOrder(boat,route,rowstart, rowend, baystart,bayend)) {
+						System.out.print("Putting the medium container "+displayID+" on top of a heavy one, the pile is in order..\n");
 						return true;
 					}
 				}
 			}
 			if(this.weight == 3) {
-				if(tryOnHeavyContainerSameDest(boat,rowstart, rowend, baystart,bayend) ) {
-					System.out.print("Putting container "+displayID+" on top of a heavy one.\n");
+				if(tryOnHeavyContainerInOrder(boat,route,rowstart, rowend, baystart,bayend) ) {
+					System.out.print("Putting the heavy container "+displayID+" on top of a heavy one, the pile is in order..\n");
 					return true;
 				}
 			}
 			return false;
 		}
 		
-		public boolean tryOnLightContainer(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
+		public boolean putContainerJustNonBlocking(Boat boat, int route, int rowstart, int rowend, int baystart, int bayend) {
+			if(this.weight == 1) {
+				if( tryOnLightContainerNonBlocking(boat,route, rowstart, rowend, baystart,bayend) ) {
+					System.out.print("Putting container "+displayID+" on top of a light one, without blocking anything.\n");
+					return true;
+				}else if(tryOnMediumContainerNonBlocking(boat,route,rowstart, rowend, baystart,bayend)){
+					System.out.print("Putting container "+displayID+" on top of a medium one, without blocking anything.\n");
+					return true;
+				}else {
+					if(tryOnHeavyContainerNonBlocking(boat,route,rowstart, rowend, baystart,bayend)) {
+						System.out.print("Putting container "+displayID+" on top of a heavy one, without blocking anything.\n");
+						return true;
+					}
+				}
+			}
+			if(this.weight == 2) {
+				if(tryOnMediumContainerNonBlocking(boat,route,rowstart, rowend, baystart,bayend) ) {
+					System.out.print("Putting container "+displayID+" on top of a medium one, without blocking anything.\n");
+					return true;
+				}else {
+					if(tryOnHeavyContainerNonBlocking(boat,route,rowstart, rowend, baystart,bayend)) {
+						System.out.print("Putting container "+displayID+" on top of a heavy one, without blocking anything.\n");
+						return true;
+					}
+				}
+			}
+			if(this.weight == 3) {
+				if(tryOnHeavyContainerNonBlocking(boat,route,rowstart, rowend, baystart,bayend) ) {
+					System.out.print("Putting container "+displayID+" on top of a heavy one, without blocking anything.\n");
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		public boolean putContainerOnSameDest(Boat boat, int route, int rowstart, int rowend, int baystart, int bayend) {		
+			if(this.weight == 1) {
+				if( tryOnLightContainerSameDest(boat,route,rowstart, rowend, baystart,bayend) ) {
+					System.out.print("Putting container "+displayID+" on top of a light one, same destination.\n");
+					return true;
+				}else if(tryOnMediumContainerSameDest(boat,route, rowstart, rowend, baystart,bayend)){
+					System.out.print("Putting container "+displayID+" on top of a medium one, same destination.\n");
+					return true;
+				}else {
+					if(tryOnHeavyContainerSameDest(boat,route, rowstart, rowend, baystart,bayend)) {
+						System.out.print("Putting container "+displayID+" on top of a heavy one, same destination.\n");
+						return true;
+					}
+				}
+			}
+			if(this.weight == 2) {
+				if(tryOnMediumContainerSameDest(boat,route, rowstart, rowend, baystart,bayend) ) {
+					System.out.print("Putting container "+displayID+" on top of a medium one, same destination.\n");
+					return true;
+				}else {
+					if(tryOnHeavyContainerSameDest(boat,route, rowstart, rowend, baystart,bayend)) {
+						System.out.print("Putting container "+displayID+" on top of a heavy one, same destination.\n");
+						return true;
+					}
+				}
+			}
+			if(this.weight == 3) {
+				if(tryOnHeavyContainerSameDest(boat,route,rowstart, rowend, baystart,bayend) ) {
+					System.out.print("Putting container "+displayID+" on top of a heavy one, same destination.\n");
+					return true;
+				}
+			}
+			return false;
+		}
+		
+
+		
+		public boolean tryOnLightContainerInOrder(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) && containerBelowHasSameDestination(boat,i,j,k)) {
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) && pileBelowIsInOrder(boat, route,i,j,k)) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight);
+							  updateLocationOnBarge(i,j,k);
+							  transported = true;
+							  return true;
+						  }
+					  }
+				  }
+			}
+		return false;
+		}
+		
+		public boolean tryOnMediumContainerInOrder(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
+			for(int i = 1; i< Boat.nrOfLayers;i++){
+				  for(int j = rowstart; j< rowend;j++){
+					  for(int k = baystart; k< bayend;k++) {
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat, i,j,k) && pileBelowIsInOrder(boat, route,i,j,k)) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight);
+							  updateLocationOnBarge(i,j,k);
+							  transported = true;
+							  return true;
+						  }
+					  }
+				  }
+			}
+		return false;
+		}
+		
+		public boolean tryOnHeavyContainerInOrder(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
+			for(int i = 1; i< Boat.nrOfLayers;i++){
+				  for(int j = rowstart; j< rowend;j++){
+					  for(int k = baystart; k< bayend;k++) {
+						  if(is20Feasible(boat,i,j,k) && pileBelowIsInOrder(boat, route,i,j,k)) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight);
+							  updateLocationOnBarge(i,j,k);
+							  transported = true;
+							  return true;
+						  }
+					  }
+				  }
+			}
+		return false;
+		}
+		
+		public boolean containerDoesNotBlock(Boat boat, int route, int i, int j, int k) {
+				int indexContainerBelow = -1;
+				int ownIndex = -1;
+				for(Container c: boat.containersOnBoat) {
+					if(c.xLoc == k && c.yLoc == k && c.zLoc == i -1) {
+						if(c.export) {
+							for(int ii =0;ii<TerminalSet.nrOfTerminals-1;ii++) {
+								if(TerminalSet.routes[route][ii] == c.destination.id) {
+									indexContainerBelow = ii;
+								}
+							}
+						}else {
+							indexContainerBelow = 50;
+						}
+					}
+				}
+				if(this.export) {
+					for(int ii =0;ii<TerminalSet.nrOfTerminals-1;ii++) {
+						if(TerminalSet.routes[route][ii] == this.destination.id) {
+							ownIndex = ii;
+						}
+					}
+				}else {
+					ownIndex = 50;
+				}
+				if(ownIndex <= indexContainerBelow) {
+					return true;
+				}else {
+					return false;
+				}					
+		}
+		
+		public boolean tryOnLightContainerNonBlocking(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
+			for(int i = 1; i< Boat.nrOfLayers;i++){
+				  for(int j = rowstart; j< rowend;j++){
+					  for(int k = baystart; k< bayend;k++) {
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) && containerDoesNotBlock(boat,route,i,j,k)) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight);
+							  updateLocationOnBarge(i,j,k);
+							  transported = true;
+							  return true;
+						  }
+					  }
+				  }
+			}
+		return false;
+		}
+		
+		public boolean tryOnMediumContainerNonBlocking(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
+			for(int i = 1; i< Boat.nrOfLayers;i++){
+				  for(int j = rowstart; j< rowend;j++){
+					  for(int k = baystart; k< bayend;k++) {
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat, i,j,k) && containerDoesNotBlock(boat, route,i,j,k)) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight);
+							  updateLocationOnBarge(i,j,k);
+							  transported = true;
+							  return true;
+						  }
+					  }
+				  }
+			}
+		return false;
+		}
+		
+		public boolean tryOnHeavyContainerNonBlocking(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
+			for(int i = 1; i< Boat.nrOfLayers;i++){
+				  for(int j = rowstart; j< rowend;j++){
+					  for(int k = baystart; k< bayend;k++) {
+						  if(is20Feasible(boat,i,j,k) && containerDoesNotBlock(boat, route,i,j,k)) {
 							  boat.set20footSpotOccupied(i,j,k, this.weight);
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
@@ -323,11 +571,11 @@ public class Container {
 			return false;
 		}
 		
-		public boolean tryOnMediumContainer(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
+		public boolean tryOnLightContainerSameDest(Boat boat, int route, int rowstart, int rowend, int baystart, int bayend) {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat,i,j,k) && containerBelowHasSameDestination(boat,i,j,k)) {
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) && containerBelowHasSameDestination(boat,i,j,k)&& pileBelowIsInOrder(boat, route,i,j,k)) {
 							  boat.set20footSpotOccupied(i,j,k, this.weight);
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
@@ -339,11 +587,27 @@ public class Container {
 		return false;
 		}
 		
-		public boolean tryOnHeavyContainerSameDest(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
+		public boolean tryOnMediumContainerSameDest(Boat boat, int route, int rowstart, int rowend, int baystart, int bayend) {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if( is20Feasible(boat,i,j,k) && containerBelowHasSameDestination(boat,i,j,k)) {
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat,i,j,k) && containerBelowHasSameDestination(boat,i,j,k) && pileBelowIsInOrder(boat, route,i,j,k)) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight);
+							  updateLocationOnBarge(i,j,k);
+							  transported = true;
+							  return true;
+						  }
+					  }
+				  }
+			}
+		return false;
+		}
+		
+		public boolean tryOnHeavyContainerSameDest(Boat boat, int route, int rowstart, int rowend, int baystart, int bayend) {
+			for(int i = 1; i< Boat.nrOfLayers;i++){
+				  for(int j = rowstart; j< rowend;j++){
+					  for(int k = baystart; k< bayend;k++) {
+						  if( is20Feasible(boat,i,j,k) && containerBelowHasSameDestination(boat,i,j,k)&& pileBelowIsInOrder(boat, route,i,j,k)) {
 							  boat.set20footSpotOccupied(i,j,k, this.weight);
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;

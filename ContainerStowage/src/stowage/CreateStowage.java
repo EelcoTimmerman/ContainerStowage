@@ -21,7 +21,7 @@ public class CreateStowage {
 	 public void createInitialStowage() {
 		 for(Container c: fixedContainers) {
 			 if(c.export) {
-				c.findFeasibleLocation(this.initialBoat);
+				c.findFeasibleLocation(this.initialBoat,0);
 				this.initialBoat.containersOnBoat.add(c);
 			 }
 		 }
@@ -41,7 +41,7 @@ public class CreateStowage {
 					 c.removeFromBarge(boat);
 					 boat.containersOnBoat.remove(c);
 					 terminal.unloadExport(c);
-					 boat.showStowage();
+					 //boat.showStowage();
 				 }
 			 }
 		 }
@@ -77,20 +77,20 @@ public class CreateStowage {
 						con.shiftFromBarge(boat);
 						boat.containersOnBoat.remove(con);
 						terminal.addToShiftAndUnloadedImport(con);
-						boat.showStowage();
+						//boat.showStowage();
 					}
 				}
 			}
 		}
 	 }
 	 
-	 public static int shiftBack(Boat boat, Terminal terminal, Container c){
+	 public static int shiftBack(Boat boat, int route, Terminal terminal, Container c){
 		if(c.shifted == false) {
 			System.out.printf("Errorrrrr, this is not a shifted container..\n");
 		}
 		int realID = c.id+1;
 		c.shifted =false;
-     	if(c.findFeasibleLocation(boat)== false){
+     	if(c.findFeasibleLocation(boat, route)== false){
 			System.out.printf("Errorrrrr, unable to shift back container!\n");
      	}
 		System.out.printf("Shifting back container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
@@ -99,13 +99,13 @@ public class CreateStowage {
      	return 1;
 	 }
 	 
-	 public static boolean loadImportContainer(Boat boat, Terminal terminal, Container c) {
+	 public static boolean loadImportContainer(Boat boat, int route, Terminal terminal, Container c) {
 			if(c.shifted == true) {
 				System.out.printf("Errorrrrr, this is a shifted container..\n");
 			}
 			int realID = c.id+1;
 	        System.out.printf("Trying to load container "+realID+"...\n");
-	        if(c.findFeasibleLocation(boat)) {
+	        if(c.findFeasibleLocation(boat,route)) {
 				terminal.loadedImport.add(c);	
 				boat.containersOnBoat.add(c);
 				System.out.printf("Loading container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
@@ -113,7 +113,7 @@ public class CreateStowage {
 		     	return true;
 	        }else {
 				System.out.printf("Unable to load back container "+realID+"\n");
-		     	boat.showStowage();
+		     	//boat.showStowage();
 	        	return false;
 	        }
 	 }
@@ -127,7 +127,11 @@ public class CreateStowage {
 		 
 	 }
 	 
-	 public static void loadBoat(Boat boat, Terminal terminal, List<Container> containers) {
+	 public static void applyMVSD(Boat boat, int route, Terminal terminal, List<Container> containers) {
+		 //create a ranking, based on blocking nr, amount of free slots
+	 }
+	 
+	 public static void loadBoat(Boat boat, int route, Terminal terminal, List<Container> containers) {
 		 //first load the shifted containers..		 		 
 		 int freeSlots = boat.countFreeSlots();
 		 int j = 0;
@@ -136,11 +140,11 @@ public class CreateStowage {
 			 for (Iterator<Container> iterator2 = terminal.unloadedImport.iterator(); iterator2.hasNext();) {
 				    Container c = iterator2.next();
 				        if(c.shifted == true) {
-				        	freeSlots -= shiftBack(boat,terminal,c);
+				        	freeSlots -= shiftBack(boat, route,terminal,c);
 					        iterator2.remove();
 					     	terminal.shiftedContainers.remove(c);
 				        }else {
-				        	if(loadImportContainer(boat, terminal,c)) {
+				        	if(loadImportContainer(boat, route, terminal,c)) {
 						        iterator2.remove();
 				        		freeSlots --;
 				        	}
@@ -155,7 +159,7 @@ public class CreateStowage {
 			 while(terminal.shiftedContainers.size() != 0 && k<20) {
 				 for (Iterator<Container> iterator = terminal.shiftedContainers.iterator(); iterator.hasNext();) {
 					    Container c = iterator.next();
-					    shiftBack(boat, terminal, c); //also removes it from 
+					    shiftBack(boat,route, terminal, c); //also removes it from 
 				         iterator.remove();
 				 }
 				 k++;

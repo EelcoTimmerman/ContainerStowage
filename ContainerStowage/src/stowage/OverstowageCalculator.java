@@ -83,7 +83,7 @@ public class OverstowageCalculator {
 				for(Container c:containersCopy) {
 					c.tellPosition();
 				}
-				int shifts = boatCopy.visitTerminal(t, boatCopy, containersCopy);
+				int shifts = boatCopy.visitTerminal(t,r, boatCopy, containersCopy);
 				this.overstowage += shifts;
 				System.out.printf("The stowage when leaving this terminal is:\n");
 				boatCopy.showStowage();

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ContainerSet {
-	public static int nrOfContainers = 25;
+	public static int nrOfContainers = 40;
 	public double probOfExport = 0.5;
 	public static double probOf20foot = 1;
 	public TerminalSet tset;
