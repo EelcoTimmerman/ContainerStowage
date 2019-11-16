@@ -4,11 +4,12 @@ import java.util.List;
 
 import stowage.CreateStowage;
 import stowage.Terminal;
+import stowage.TerminalSet;
 
 public class Boat {
-	public static int nrOfBays = 6;
+	public static int nrOfBays = 4;
 	public static int nrOfLayers = 3;
-	public static int nrOfRows = 2;
+	public static int nrOfRows = 1;
 	public int leftback = 0;
 	public int rightback = 0;
 	public int leftfront = 0;
@@ -24,6 +25,7 @@ public class Boat {
 
 	public static int weightBoat;
 	public int[][][] stowage = new int[nrOfLayers][nrOfRows][nrOfBays];
+	public int [][][] destStowage = new int [nrOfLayers][nrOfRows][nrOfBays];
 	
 	public Boat() {
 		System.out.print("A boat has been created \n");
@@ -45,39 +47,28 @@ public class Boat {
 			  }
 		  }
 		calcWeight();
-		reportWeight();
+		//reportWeight();
 	}
 	
 	public int[][][] getStowage(){
 		return stowage;		
 	}
 		
-	public void set20footSpotOccupied(int layer, int row, int bay, int weight) {
+	public void set20footSpotOccupied(int layer, int row, int bay, int weight, int dest) {
 		stowage[layer][row][bay] = weight;
-	}
-	
-	public void set40footSpotOccupied(int layer, int row, int bay) {
-		if(bay >= nrOfBays - 1) {
-			System.out.print("Trying to put a container overboard nerd..");
-		}
-		stowage[layer][row][bay] = 2;
-		stowage[layer][row][bay + 1] = 2;
+		destStowage[layer][row][bay] = dest;
 	}
 	
 	public void set20LocationEmpty(int layer, int row, int bay) {
 		stowage[layer][row][bay] = 0;
+		destStowage[layer][row][bay] = -1;
 	}	
-	
-	public void set40LocationEmpty(int layer, int row, int bay) {
-		stowage[layer][row][bay] = 0;
-		stowage[layer][row][bay + 1] = 0;
-	}
-	
+		
 	public int visitTerminal(Terminal terminal, int route, Boat boat, List<Container> containers) {
 		int shifts = 0;
 		CreateStowage.removeExport(boat, terminal, containers);
 		shifts += terminal.shiftedContainers.size();
-		CreateStowage.loadBoat(boat, route, terminal, containers);
+		CreateStowage.loadBoat(boat, route, terminal);
 		return shifts;
 	}
 	
@@ -147,11 +138,6 @@ public class Boat {
 		System.out.printf("Front Weight: "+this.frontweight+"\n");
 		System.out.printf("Back Weight: "+this.backweight+"\n");
 	}
-
-	
-	public boolean blockAssignmentIsNecessary() {
-	  return false;
-	}
 	
 	public int whereIsBalanceWeightNeeded(int weight) {
 		int f =0;
@@ -202,6 +188,78 @@ public class Boat {
 			return false;
 		}
 				
+	}
+	
+	public int getProximityInRoute(int route, int dest) {			
+		int index = 100;			
+		if(dest < 50) {
+			for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {
+				if(TerminalSet.routes[route][i] == dest) {
+					index = i;
+				}
+			}
+		}else {
+			index = 50;
+		}
+		return index;
+	}
+	
+	public boolean highestContainerHasWeight(int j, int k, int weight) {
+		for(int i=0;i<nrOfLayers-1;i++) {
+			if(stowage[i+1][j][k] == 0 && stowage[i][j][k] == weight) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public int amountInWeightClassOnTop(int j, int k, int weight) {
+		int count =0;
+		for(int i=0;i<nrOfLayers-1;i++) {
+			if(stowage[i][j][k] == weight) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	public int calcPileScoreRightWeightOnTop(int route, int j, int k, int weight, List<Container> containers) {
+		int freespots = 0;
+		int b0 = 0;
+		for(int i=0;i<nrOfLayers;i++) {
+			if(stowage[i][j][k] == 0) {
+				freespots++;
+			}
+			if(i>0 && getProximityInRoute(route, destStowage[i-1][j][k]) > getProximityInRoute(route, destStowage[i][j][k]) && stowage[i][j][k] > 0) {
+				b0++;
+			}
+		}
+		int h = Math.min(freespots, containers.size());
+		int n = amountInWeightClassOnTop(j,k,weight);
+		int obj = 0;
+		for(int i = 0;i< n;i++) {
+			int currentObj = h  ;
+			if(currentObj > obj) {
+				obj = currentObj;
+			}
+		}
+		return obj;
+	}
+	
+	public boolean pileBelowIsInOrder(Boat boat, int route, int zlocation, int j, int k, int dest) {	
+		int destPrev = 100;
+		int count = 0;
+		for(int i = 0; i < zlocation ;i++) {					
+				if(getProximityInRoute(route, this.destStowage[i][j][k]) <= destPrev)  {
+					destPrev = getProximityInRoute(route, this.destStowage[i][j][k]);
+					count++;
+				}		
+		}
+		int ownIndex = getProximityInRoute(route, dest);
+		if(count == zlocation && ownIndex <= destPrev) {
+			return true;
+		}
+		return false;
 	}
 	
 }

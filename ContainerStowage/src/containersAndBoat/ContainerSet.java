@@ -28,8 +28,8 @@ public class ContainerSet {
 		for(int i=0; i < nrOfContainers; i++) {
 			Container c = new Container(id);
 			id++;
-			int ind = rand.nextInt(tset.nrOfTerminals -1) + 1; // cs worden verdeeld over term 1--T
-			c.setDestination(tset.terminals.get(ind));
+			int ind = rand.nextInt(TerminalSet.nrOfTerminals -1) + 1; // cs worden verdeeld over term 1--T
+			c.setDestination(TerminalSet.terminals.get(ind));
 			int n = rand.nextInt(100);
 			int rweight = rand.nextInt(100);
 			if(n>probOfExport*100) { //This can be found in fazi's paper

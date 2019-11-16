@@ -92,6 +92,7 @@ public class CreateStowage {
 		c.shifted =false;
      	if(c.findFeasibleLocation(boat, route)== false){
 			System.out.printf("Errorrrrr, unable to shift back container!\n");
+			return 0;
      	}
 		System.out.printf("Shifting back container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
      	boat.containersOnBoat.add(c);
@@ -127,18 +128,33 @@ public class CreateStowage {
 		 
 	 }
 	 
-	 public static void applyMVSD(Boat boat, int route, Terminal terminal, List<Container> containers) {
-		 //create a ranking, based on blocking nr, amount of free slots
+	 public static void applyMVSD(Boat boat, int route, Terminal terminal) {
+		Container c = terminal.unloadedImport.get(0);
+		int lowestWeight = c.weight;
+		
+		//look for places with that weight on top
+		//if(found){   say with n  containers of that weight class on top
+		//calculate obj = max_m h(m) + b(0) - b(m) - g(m) for 0<= m <= n.
+		// then select the pile with the highest obj and take away m* containers there.
+		//else{ do the same but then for the pile where you have to take away the least to reach the right weight class
+		 System.out.print("Starting the MVSD procedure, ");
+
+	 }
+	
+	 public static void loadBoat(Boat boat, int route, Terminal terminal) {
+		 while(terminal.unloadedImport.size() != 0 && boat.countFreeSlots() != 0) {
+			loadOneSequence(boat,route,terminal);
+			applyMVSD(boat,route, terminal);
+		 }
 	 }
 	 
-	 public static void loadBoat(Boat boat, int route, Terminal terminal, List<Container> containers) {
-		 //first load the shifted containers..		 		 
+	 public static void loadOneSequence(Boat boat, int route, Terminal terminal) {
 		 int freeSlots = boat.countFreeSlots();
-		 int j = 0;
 		 terminal.unloadedImport.sort(Comparator.comparing(Container::getOrder));
-		 while(freeSlots > terminal.shiftedContainers.size() && terminal.unloadedImport.size() > 0 && j<20) {
-			 for (Iterator<Container> iterator2 = terminal.unloadedImport.iterator(); iterator2.hasNext();) {
-				    Container c = iterator2.next();
+		 
+		 for (Iterator<Container> iterator2 = terminal.unloadedImport.iterator(); iterator2.hasNext();) {
+				 if(freeSlots > terminal.shiftedContainers.size()) {
+					 Container c = iterator2.next();
 				        if(c.shifted == true) {
 				        	freeSlots -= shiftBack(boat, route,terminal,c);
 					        iterator2.remove();
@@ -149,21 +165,20 @@ public class CreateStowage {
 				        		freeSlots --;
 				        	}
 				        }	
-				        j++;
+				}else {
+					break;
 				}
-		 }
+			}		 
 		 if(terminal.shiftedContainers.size() != 0) {
 			 System.out.printf("No space anymore for import containers, just loading back shifted ones.\n");
 			 terminal.shiftedContainers.sort(Comparator.comparing(Container::getOrder));
-			 int k=0;
-			 while(terminal.shiftedContainers.size() != 0 && k<20) {
-				 for (Iterator<Container> iterator = terminal.shiftedContainers.iterator(); iterator.hasNext();) {
+				 for(Iterator<Container> iterator = terminal.shiftedContainers.iterator(); iterator.hasNext();) {
 					    Container c = iterator.next();
-					    shiftBack(boat,route, terminal, c); //also removes it from 
+					    shiftBack(boat,route, terminal, c);
+					    terminal.unloadedImport.remove(c);
 				         iterator.remove();
 				 }
-				 k++;
-			 }
+
 		 }
 
 	 }

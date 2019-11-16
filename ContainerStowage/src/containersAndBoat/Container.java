@@ -63,16 +63,23 @@ public class Container {
 			this.destination = terminal;
 		}
 		
+		public int getDest() {
+			if(this.export) {
+				return this.destination.id;
+			}else {
+				return 50;
+			}
+		}
+		
 		public boolean findFeasibleLocation(Boat boat, int route){
 			boat.calcWeight();
 			if(boat.checkIfStableWithNewContainer(this.weight)) {
-				findFeasibleLocationInBlock(boat,route, 0);
+				return findFeasibleLocationInBlock(boat,route, 0);
 			}else {
 				int block =0;
 				block = boat.whereIsBalanceWeightNeeded(this.weight);
-				findFeasibleLocationInBlock(boat, route, block);
+				return findFeasibleLocationInBlock(boat, route, block);
 			}		
-			return true;	
 		}
 		
 		public boolean findFeasibleLocationInBlock(Boat boat, int route, int block) {
@@ -143,33 +150,33 @@ public class Container {
 			if(this.weight == 3) {
 				if(this.export){
 					if(placeHeavyExport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
+						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
 					}
 				}else {
 					if(placeHeavyImport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
+						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
 					}				
 				}
 			}
 			if(this.weight == 2) {
 				if(this.export) {
 					if(placeMediumExport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
+						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
 					}
 				}else {
 					if(placeMediumImport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
+						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
 					}				
 				}			
 			}
 			if(this.weight == 1){
 				if(this.export){
 					if(placeLightExport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
+						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
 					}
 				}else {
 					if(placeLightImport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						putInAnyPlace(boat, rowstart, rowend, baystart, bayend);
+						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
 					}					
 				}
 			}			
@@ -258,67 +265,27 @@ public class Container {
 		}
 		
 		public boolean putInAnyPlace(Boat boat, int rowstart, int rowend, int baystart, int bayend) {
-			System.out.print("Putting container "+displayID+" in any place.\n");
+			int check =0;
 			for(int i = 0; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
 						  if(is20Feasible(boat,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+							  System.out.print("Putting container "+displayID+" in any place.\n");
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
+							  check =1;
 							  return true;
 						  }
+						  if(i == Boat.nrOfLayers -1 && j == rowend -1 && k == bayend -1 && check  ==0) {
+							  System.out.print("Unable to load container "+displayID+" in any place.\n");
+						  }
+
 					  }
 				  }
 			}
 		return false;
 			
-		}
-		
-		public int getProximityInroute(int route, Container c) {			
-			int index = 100;			
-			if(c.export) {
-				for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {
-					if(TerminalSet.routes[route][i] == c.destination.id) {
-						index = i;
-					}
-				}
-			}else {
-				index = 50;
-			}
-			return index;
-		}
-		
-		public boolean pileBelowIsInOrder(Boat boat, int route, int zlocation, int j, int k) {	
-			int destPrev = 100;
-			int count = 0;
-			for(int i = 0; i < zlocation ;i++) {					
-				for(Container c:boat.containersOnBoat) {
-					if(c.yLoc == j && c.xLoc == k && c.zLoc == i&& getProximityInroute(route, c) <= destPrev)  {
-						if(c.export) {
-							destPrev = getProximityInroute(route, c);
-						}else {
-							destPrev = 50;
-						}
-						count++;
-					}
-				}
-
-			}
-			int ownIndex = -1;
-			if(this.export) {
-				for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {
-					if(TerminalSet.routes[route][i] == this.destination.id) {
-						ownIndex = i;
-					}
-				}
-			}else {
-				ownIndex = 50;
-			}
-			if(count == zlocation && ownIndex <= destPrev) {
-				return true;
-			}
-			return false;
 		}
 		
 		public boolean putContainerOnPileInOrder(Boat boat, int route, int rowstart, int rowend, int baystart, int bayend) {
@@ -432,8 +399,8 @@ public class Container {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) && pileBelowIsInOrder(boat, route,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) && boat.pileBelowIsInOrder(boat,route,i,j,k,getDest())) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
 							  return true;
@@ -448,8 +415,8 @@ public class Container {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat, i,j,k) && pileBelowIsInOrder(boat, route,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat, i,j,k) && boat.pileBelowIsInOrder(boat, route,i,j,k,getDest())) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
 							  return true;
@@ -464,8 +431,8 @@ public class Container {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && pileBelowIsInOrder(boat, route,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+						  if(is20Feasible(boat,i,j,k) && boat.pileBelowIsInOrder(boat, route,i,j,k,getDest())) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
 							  return true;
@@ -476,44 +443,25 @@ public class Container {
 		return false;
 		}
 		
-		public boolean containerDoesNotBlock(Boat boat, int route, int i, int j, int k) {
-				int indexContainerBelow = -1;
-				int ownIndex = -1;
-				for(Container c: boat.containersOnBoat) {
-					if(c.xLoc == k && c.yLoc == k && c.zLoc == i -1) {
-						if(c.export) {
-							for(int ii =0;ii<TerminalSet.nrOfTerminals-1;ii++) {
-								if(TerminalSet.routes[route][ii] == c.destination.id) {
-									indexContainerBelow = ii;
-								}
-							}
-						}else {
-							indexContainerBelow = 50;
-						}
-					}
-				}
-				if(this.export) {
-					for(int ii =0;ii<TerminalSet.nrOfTerminals-1;ii++) {
-						if(TerminalSet.routes[route][ii] == this.destination.id) {
-							ownIndex = ii;
-						}
-					}
-				}else {
-					ownIndex = 50;
-				}
+		public boolean containerDoesNotBlock(Boat boat, int route, int i, int j, int k, int dest) {
+			if(i>0) {
+				int destBelow = boat.destStowage[i-1][j][k];
+				int indexContainerBelow = boat.getProximityInRoute(route, destBelow);
+				int ownIndex = boat.getProximityInRoute(route, dest);
 				if(ownIndex <= indexContainerBelow) {
 					return true;
-				}else {
-					return false;
-				}					
+				}
+			}
+			return false;
+					
 		}
 		
 		public boolean tryOnLightContainerNonBlocking(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) && containerDoesNotBlock(boat,route,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) && containerDoesNotBlock(boat,route,i,j,k,getDest())) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
 							  return true;
@@ -528,8 +476,8 @@ public class Container {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat, i,j,k) && containerDoesNotBlock(boat, route,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat, i,j,k) && containerDoesNotBlock(boat, route,i,j,k,getDest())) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
 							  return true;
@@ -544,8 +492,8 @@ public class Container {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && containerDoesNotBlock(boat, route,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+						  if(is20Feasible(boat,i,j,k) && containerDoesNotBlock(boat, route,i,j,k,getDest())) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
 							  return true;
@@ -561,7 +509,7 @@ public class Container {
 				for(int k = baystart; k< bayend;k++) {
 					if(is20Feasible(boat,0,j,k) ) {
 						System.out.print("Putting container"+displayID+" on the bottom.\n");
-						boat.set20footSpotOccupied(0,j,k, this.weight);
+						  boat.set20footSpotOccupied(0,j,k, this.weight, getDest());
 						updateLocationOnBarge(0,j,k);
 						transported = true;
 						return true;
@@ -575,8 +523,9 @@ public class Container {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) && containerBelowHasSameDestination(boat,i,j,k)&& pileBelowIsInOrder(boat, route,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) &&
+								  containerBelowHasSameDestination(boat,i,j,k)&& boat.pileBelowIsInOrder(boat, route,i,j,k,getDest())) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
 							  return true;
@@ -591,8 +540,9 @@ public class Container {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat,i,j,k) && containerBelowHasSameDestination(boat,i,j,k) && pileBelowIsInOrder(boat, route,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat,i,j,k) &&
+							  containerBelowHasSameDestination(boat,i,j,k) && boat.pileBelowIsInOrder(boat, route,i,j,k,getDest())) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
 							  return true;
@@ -607,8 +557,8 @@ public class Container {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
 				  for(int j = rowstart; j< rowend;j++){
 					  for(int k = baystart; k< bayend;k++) {
-						  if( is20Feasible(boat,i,j,k) && containerBelowHasSameDestination(boat,i,j,k)&& pileBelowIsInOrder(boat, route,i,j,k)) {
-							  boat.set20footSpotOccupied(i,j,k, this.weight);
+						  if( is20Feasible(boat,i,j,k) && containerBelowHasSameDestination(boat,i,j,k)&& boat.pileBelowIsInOrder(boat, route,i,j,k,getDest())) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
 							  updateLocationOnBarge(i,j,k);
 							  transported = true;
 							  return true;
@@ -636,27 +586,17 @@ public class Container {
 		
 		
 		public boolean containerBelowHasSameDestination(Boat boat, int i, int j, int k ) {
-			if(this.export == true) {
-				if(i > 0) {
-					for(Container c:boat.containersOnBoat) {
-						if(c.destination.id == this.destination.id) {
-							if(c.xLoc == k && c.yLoc == j && c.zLoc == i-1 && c.export) {
-								return true;
-							}
-						}
-
-					}
+			if(i>0) {
+				int dest = getDest();
+				int destBelow = boat.destStowage[i-1][j][k];
+				if(dest == destBelow) {
+					return true;
+				}else {
+					return false;
 				}
 			}else {
-				if(i > 0) {
-					for(Container c:boat.containersOnBoat) {
-						if(c.xLoc == k && c.yLoc == j && c.zLoc == i-1 &&c.export == false) {
-							return true;
-						}
-					}
-				}
+				return false;
 			}
-			return false;
 		}
 		
 		public void updateLocationOnBarge(int i, int j, int k) {
