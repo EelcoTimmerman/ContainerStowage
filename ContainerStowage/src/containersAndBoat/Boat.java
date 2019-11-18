@@ -7,8 +7,8 @@ import stowage.Terminal;
 import stowage.TerminalSet;
 
 public class Boat {
-	public static int nrOfBays = 4;
-	public static int nrOfLayers = 3;
+	public static int nrOfBays = 3;
+	public static int nrOfLayers = 5;
 	public static int nrOfRows = 1;
 	public int leftback = 0;
 	public int rightback = 0;
@@ -19,8 +19,8 @@ public class Boat {
 	public int backweight =0;
 	public int frontweight =0;
 	public int q1 = 500; //barge capacity
-	public int q2 = 10; // max left/right weight difference
-	public int q3 = 10;  // front/back weight difference
+	public int q2 = 500; // max left/right weight difference
+	public int q3 = 500;  // front/back weight difference
 	public List<Container> containersOnBoat = new ArrayList<>();
 
 	public static int weightBoat;
@@ -50,6 +50,23 @@ public class Boat {
 		//reportWeight();
 	}
 	
+	public void showDestStowage() {
+		System.out.print("Destination plan:\n");  
+		for(int i = 0; i<nrOfLayers;i++) {
+			  for(int j = 0; j<nrOfRows;j++) {
+				  for(int k = 0; k<nrOfBays;k++) {
+					  System.out.print(destStowage[i][j][k]);
+					  if(k == nrOfBays - 1 && j != nrOfRows -1) {
+						  System.out.printf("\n");
+					  }if(k == nrOfBays - 1 && j == nrOfRows -1) {
+						  System.out.printf("\n");
+						  System.out.printf("\n");
+					  }
+				  }
+			  }
+		  }
+	}
+	
 	public int[][][] getStowage(){
 		return stowage;		
 	}
@@ -61,7 +78,7 @@ public class Boat {
 	
 	public void set20LocationEmpty(int layer, int row, int bay) {
 		stowage[layer][row][bay] = 0;
-		destStowage[layer][row][bay] = -1;
+		destStowage[layer][row][bay] = 0;
 	}	
 		
 	public int visitTerminal(Terminal terminal, int route, Boat boat, List<Container> containers) {
@@ -151,9 +168,9 @@ public class Boat {
 			f = this.backweight +weight - this.frontweight - q3;
 		}
 		if(rightweight> leftweight) {
-			l = this.rightweight +weight- this.leftweight - q2;
+			l = this.rightweight + weight - this.leftweight - q2;
 		}else {
-			r = this.leftweight +weight - this.rightweight - q2;
+			r = this.leftweight + weight - this.rightweight - q2;
 		}
 			if(f <= 0 && b <= 0 && r <=0 && l <=0) {
 				block = 0;
@@ -192,14 +209,14 @@ public class Boat {
 	
 	public int getProximityInRoute(int route, int dest) {			
 		int index = 100;			
-		if(dest < 50) {
+		if(dest < 9) {
 			for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {
 				if(TerminalSet.routes[route][i] == dest) {
 					index = i;
 				}
 			}
 		}else {
-			index = 50;
+			index = 9;
 		}
 		return index;
 	}
@@ -223,22 +240,87 @@ public class Boat {
 		return count;
 	}
 	
+	public int amountOfWeightClassInTryingSet(List<Container> containers, int weight) {
+		int count = 0;
+		for(Container c:containers) {
+			if(c.weight == weight) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	public int[] nrOfBlockingsUntill(int route,int Z, int j,int k) {
+		int[] b0 = {0,0};
+		int lowestIndexBelow = getProximityInRoute(route, this.destStowage[0][j][k]);
+		int index;
+		for(int i=1;i<Z;i++) {
+			int dest = this.destStowage[i][j][k];
+			if(dest > 0) {
+				index = getProximityInRoute(route, dest);
+			}else {
+				index = 0;
+			}
+			if(index > lowestIndexBelow) {
+				b0[0]++;
+			}else if(index<= lowestIndexBelow && index>0){
+				lowestIndexBelow = index;
+				b0[1] = lowestIndexBelow;
+			}
+		}
+		return b0;
+	}
+	
+	public int nrOfBlockingsAfterMovement(int route, int m, int h, int j, int k, List<Container> containers) {
+		int highestContainer = 0;
+		for(int y =0;y<nrOfLayers;y++) {
+			if(stowage[y][j][k] == 0) {
+				highestContainer = y - m;
+				break;
+			}
+		}
+		if(highestContainer < 0) {
+			System.out.print("Unable to unload that many containers..");
+		}
+		int blockingLeft = nrOfBlockingsUntill(route, highestContainer,j,k)[0];
+		int lowestIndexLeft = nrOfBlockingsUntill(route, highestContainer,j,k)[1];
+		int blockings = 0;
+		for(int i = 0; i<h;i++) {
+			int dest = containers.get(i).getDest();
+			int index = getProximityInRoute(route, dest);
+			if(index > lowestIndexLeft) {
+				blockings++;
+			}
+		}
+		return blockings + blockingLeft;
+	}
+	
 	public int calcPileScoreRightWeightOnTop(int route, int j, int k, int weight, List<Container> containers) {
+		System.out.printf("We now calculate the score of pile: "+j+", "+k+"\n");
+		System.out.printf("These are the containers to be loaded:\n");
+		for(Container c:containers) {
+			c.tellPosition();
+		}
 		int freespots = 0;
-		int b0 = 0;
+		int b0 = nrOfBlockingsUntill(route, nrOfLayers, j,k)[0];
 		for(int i=0;i<nrOfLayers;i++) {
 			if(stowage[i][j][k] == 0) {
 				freespots++;
 			}
-			if(i>0 && getProximityInRoute(route, destStowage[i-1][j][k]) > getProximityInRoute(route, destStowage[i][j][k]) && stowage[i][j][k] > 0) {
-				b0++;
-			}
 		}
-		int h = Math.min(freespots, containers.size());
+		int maxToBeLoaded = amountOfWeightClassInTryingSet(containers, weight);		
+		int h = Math.min(freespots, maxToBeLoaded);
 		int n = amountInWeightClassOnTop(j,k,weight);
+		int maxUnload = nrOfLayers- freespots+1;
 		int obj = 0;
-		for(int i = 0;i< n;i++) {
-			int currentObj = h  ;
+		for(int m = 0; m<= n;m++) {
+			int bm = nrOfBlockingsAfterMovement(route, m, h, j, k, containers);
+			System.out.printf("If we take off: "+m+" containers, we end up with this score:\n");
+			System.out.printf("h is: "+h+", the min of freespots "+freespots+" and nr of c. in weightclass: "+maxToBeLoaded+"\n");
+			System.out.printf("The initial blocking number: "+b0+"\n");
+			System.out.printf("Blocking number after movements are complete: "+bm+"\n");
+			System.out.printf("Voluntary shifts needed: "+m+"\n");
+			int currentObj = h + b0 - nrOfBlockingsAfterMovement(route, m,h, j,k, containers) ;
 			if(currentObj > obj) {
 				obj = currentObj;
 			}

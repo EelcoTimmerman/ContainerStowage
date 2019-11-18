@@ -20,10 +20,17 @@ public class OverstowageCalculator {
 		copyTerminals(terminals);
 		copyContainers(containers);		
 		this.boatCopy = new Boat();
-		for(int z = 0;z<boat.nrOfLayers;z++) {
-			for(int y = 0;y< boat.nrOfRows;y++) {
-				for(int x=0;x<boat.nrOfBays;x++) {
+		for(int z = 0;z<Boat.nrOfLayers;z++) {
+			for(int y = 0;y< Boat.nrOfRows;y++) {
+				for(int x=0;x<Boat.nrOfBays;x++) {
 					boatCopy.stowage[z][y][x] = boat.stowage[z][y][x];
+				}
+			}
+		}
+		for(int z = 0;z<Boat.nrOfLayers;z++) {
+			for(int y = 0;y< Boat.nrOfRows;y++) {
+				for(int x=0;x<Boat.nrOfBays;x++) {
+					boatCopy.destStowage[z][y][x] = boat.destStowage[z][y][x];
 				}
 			}
 		}
@@ -80,6 +87,7 @@ public class OverstowageCalculator {
 				t.talk();
 				System.out.print("The stowage when arriving at this terminal is:\n");
 				boatCopy.showStowage();
+				boatCopy.showDestStowage();
 				for(Container c:containersCopy) {
 					c.tellPosition();
 				}

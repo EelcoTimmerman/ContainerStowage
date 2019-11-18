@@ -110,10 +110,10 @@ public class CreateStowage {
 				terminal.loadedImport.add(c);	
 				boat.containersOnBoat.add(c);
 				System.out.printf("Loading container "+realID+" in position: " + c.zLoc + c.yLoc + c.xLoc +"\n");
-		     	boat.showStowage();
-		     	return true;
+		     	//boat.showStowage();
+				return true;
 	        }else {
-				System.out.printf("Unable to load back container "+realID+"\n");
+				System.out.printf("Unable to load back container "+realID+".\n");
 		     	//boat.showStowage();
 	        	return false;
 	        }
@@ -130,7 +130,14 @@ public class CreateStowage {
 	 
 	 public static void applyMVSD(Boat boat, int route, Terminal terminal) {
 		Container c = terminal.unloadedImport.get(0);
-		int lowestWeight = c.weight;
+		int highestWeight = c.weight;
+		boat.showDestStowage();
+		System.out.printf("The highest weight in the trying set is "+highestWeight+"\n");
+		for(int j=0;j<Boat.nrOfRows;j++) {
+			 for(int k=0;k<Boat.nrOfBays;k++) {
+				boat.calcPileScoreRightWeightOnTop(route, j, k, highestWeight, terminal.unloadedImport);
+			}
+		}
 		
 		//look for places with that weight on top
 		//if(found){   say with n  containers of that weight class on top
@@ -142,10 +149,14 @@ public class CreateStowage {
 	 }
 	
 	 public static void loadBoat(Boat boat, int route, Terminal terminal) {
-		 while(terminal.unloadedImport.size() != 0 && boat.countFreeSlots() != 0) {
 			loadOneSequence(boat,route,terminal);
-			applyMVSD(boat,route, terminal);
-		 }
+			if(terminal.unloadedImport.size() > 0) {
+				applyMVSD(boat,route, terminal);
+			}
+		// while(terminal.unloadedImport.size() != 0 && boat.countFreeSlots() != 0) {
+			//loadOneSequence(boat,route,terminal);
+			//applyMVSD(boat,route, terminal);
+		 //}
 	 }
 	 
 	 public static void loadOneSequence(Boat boat, int route, Terminal terminal) {
@@ -168,7 +179,8 @@ public class CreateStowage {
 				}else {
 					break;
 				}
-			}		 
+			}
+		 terminal.unloadedImport.sort(Comparator.comparing(Container::getOrder));
 		 if(terminal.shiftedContainers.size() != 0) {
 			 System.out.printf("No space anymore for import containers, just loading back shifted ones.\n");
 			 terminal.shiftedContainers.sort(Comparator.comparing(Container::getOrder));

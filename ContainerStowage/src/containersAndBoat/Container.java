@@ -67,7 +67,7 @@ public class Container {
 			if(this.export) {
 				return this.destination.id;
 			}else {
-				return 50;
+				return 9;
 			}
 		}
 		
@@ -150,33 +150,39 @@ public class Container {
 			if(this.weight == 3) {
 				if(this.export){
 					if(placeHeavyExport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
+						System.out.print("Container "+this.displayID+" is left for the MVSD.\n");
+						return false;
 					}
 				}else {
 					if(placeHeavyImport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
+						System.out.print("Container "+this.displayID+" is left for the MVSD.\n");
+						return false;
 					}				
 				}
 			}
 			if(this.weight == 2) {
 				if(this.export) {
 					if(placeMediumExport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
+						System.out.print("Container "+this.displayID+" is left for the MVSD.\n");
+						return false;
 					}
 				}else {
 					if(placeMediumImport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
+						System.out.print("Container "+this.displayID+" is left for the MVSD.\n");
+						return false;
 					}				
 				}			
 			}
 			if(this.weight == 1){
 				if(this.export){
 					if(placeLightExport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
+						System.out.print("Container "+this.displayID+" is left for the MVSD.\n");
+						return false;
 					}
 				}else {
 					if(placeLightImport(boat,route, rowstart, rowend, baystart, bayend) == false) {
-						System.out.print("Container "+this.displayID+" is shifted left for the MVSD.");
+						System.out.print("Container "+this.displayID+" is left for the MVSD.\n");
+						return false;
 					}					
 				}
 			}			
@@ -212,6 +218,8 @@ public class Container {
 				return true;
 			}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
 				return true;
+			}else if(putItOnTheBottom(boat, rowstart, rowend,baystart,bayend)) {
+				return true;
 			}	
 		return false;
 		}
@@ -222,6 +230,8 @@ public class Container {
 			}else if(putContainerOnPileInOrder(boat, route, rowstart, rowend,baystart,bayend)) {
 				return true;
 			}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
+				return true;
+			}else if(putItOnTheBottom(boat, rowstart, rowend,baystart,bayend)) {
 				return true;
 			}	
 		return false;
@@ -234,6 +244,8 @@ public class Container {
 				return true;
 			}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
 				return true;
+			}else if(putItOnTheBottom(boat, rowstart, rowend,baystart,bayend)) {
+				return true;
 			}
 		return false;
 		}
@@ -242,6 +254,8 @@ public class Container {
 			if(putContainerOnSameDest(boat,route, rowstart, rowend,baystart,bayend)) {
 				return true;
 			}else if(putContainerJustNonBlocking(boat, route, rowstart, rowend,baystart,bayend)) {
+				return true;
+			}else if(putItOnTheBottom(boat, rowstart, rowend,baystart,bayend)) {
 				return true;
 			}	
 		return false;
@@ -509,7 +523,7 @@ public class Container {
 				for(int k = baystart; k< bayend;k++) {
 					if(is20Feasible(boat,0,j,k) ) {
 						System.out.print("Putting container"+displayID+" on the bottom.\n");
-						  boat.set20footSpotOccupied(0,j,k, this.weight, getDest());
+						boat.set20footSpotOccupied(0,j,k, this.weight, getDest());
 						updateLocationOnBarge(0,j,k);
 						transported = true;
 						return true;
