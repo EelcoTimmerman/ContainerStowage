@@ -87,7 +87,6 @@ public class OverstowageCalculator {
 				t.talk();
 				System.out.print("The stowage when arriving at this terminal is:\n");
 				boatCopy.showStowage();
-				boatCopy.showDestStowage();
 				for(Container c:containersCopy) {
 					c.tellPosition();
 				}

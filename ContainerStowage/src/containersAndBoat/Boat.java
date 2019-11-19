@@ -1,5 +1,7 @@
 package containersAndBoat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import stowage.CreateStowage;
@@ -7,8 +9,8 @@ import stowage.Terminal;
 import stowage.TerminalSet;
 
 public class Boat {
-	public static int nrOfBays = 3;
-	public static int nrOfLayers = 5;
+	public static int nrOfBays = 6;
+	public static int nrOfLayers = 3;
 	public static int nrOfRows = 1;
 	public int leftback = 0;
 	public int rightback = 0;
@@ -46,6 +48,7 @@ public class Boat {
 				  }
 			  }
 		  }
+		showDestStowage();
 		calcWeight();
 		//reportWeight();
 	}
@@ -232,9 +235,14 @@ public class Boat {
 	
 	public int amountInWeightClassOnTop(int j, int k, int weight) {
 		int count =0;
-		for(int i=0;i<nrOfLayers-1;i++) {
-			if(stowage[i][j][k] == weight) {
+		for(int i=nrOfLayers-1;i >= 0;i--) {
+			if(stowage[i][j][k] == 0) {
+				continue;
+			}
+			else if(stowage[i][j][k] == weight) {
 				count++;
+			}else {
+				break;
 			}
 		}
 		return count;
@@ -254,55 +262,82 @@ public class Boat {
 		int[] b0 = {0,0};
 		int lowestIndexBelow = getProximityInRoute(route, this.destStowage[0][j][k]);
 		int index;
-		for(int i=1;i<Z;i++) {
-			int dest = this.destStowage[i][j][k];
-			if(dest > 0) {
-				index = getProximityInRoute(route, dest);
-			}else {
-				index = 0;
-			}
-			if(index > lowestIndexBelow) {
-				b0[0]++;
-			}else if(index<= lowestIndexBelow && index>0){
-				lowestIndexBelow = index;
-				b0[1] = lowestIndexBelow;
+		if(Z==-1) {
+			b0[0] = 0;
+			b0[1] = 10;
+		}else if(Z == 0) {
+			b0[0] = 0;
+			b0[1] = lowestIndexBelow;
+		}else {
+			for(int i=1;i<=Z;i++) {
+				int dest = this.destStowage[i][j][k];
+				if(dest > 0) {
+					index = getProximityInRoute(route, dest);
+				}else {
+					index = 0;
+				}
+				if(index > lowestIndexBelow) {
+					b0[0]++;
+				}else if(index<= lowestIndexBelow && index>0){
+					lowestIndexBelow = index;
+					b0[1] = lowestIndexBelow;
+				}
 			}
 		}
 		return b0;
 	}
 	
 	public int nrOfBlockingsAfterMovement(int route, int m, int h, int j, int k, List<Container> containers) {
+		//calc of the blockings in the pile thats left
 		int highestContainer = 0;
 		for(int y =0;y<nrOfLayers;y++) {
 			if(stowage[y][j][k] == 0) {
-				highestContainer = y - m;
+				highestContainer = y - m -1;
 				break;
 			}
 		}
-		if(highestContainer < 0) {
-			System.out.print("Unable to unload that many containers..");
+		if(highestContainer < -1) {
+			System.out.print("Trying to unload more containers than available in pile..");
 		}
-		int blockingLeft = nrOfBlockingsUntill(route, highestContainer,j,k)[0];
 		int lowestIndexLeft = nrOfBlockingsUntill(route, highestContainer,j,k)[1];
+		int blockingLeft = nrOfBlockingsUntill(route, highestContainer,j,k)[0];
+		//calc of the new amount of blockings
+		List<Integer> destinations = new ArrayList<Integer>();
+		
 		int blockings = 0;
-		for(int i = 0; i<h;i++) {
-			int dest = containers.get(i).getDest();
-			int index = getProximityInRoute(route, dest);
-			if(index > lowestIndexLeft) {
-				blockings++;
+		if(m>0) {
+			for(int g = 0;g<m;g++) {
+				int removedDest = getProximityInRoute(route,destStowage[highestContainer + g+1][j][k]);						
+				destinations.add(removedDest);
 			}
 		}
+		if(h>0) {
+			for(int i = 0; i<h;i++) {
+				int dest = containers.get(i).getDest();
+				int index = getProximityInRoute(route, dest);
+				destinations.add(index);
+			}
+		}
+		Collections.sort(destinations,Collections.reverseOrder());
+		for(int dest:destinations) {
+			if(dest > lowestIndexLeft) {
+				blockings++;
+			}else {
+				lowestIndexLeft = dest;
+			}
+		}
+		
 		return blockings + blockingLeft;
 	}
 	
-	public int calcPileScoreRightWeightOnTop(int route, int j, int k, int weight, List<Container> containers) {
-		System.out.printf("We now calculate the score of pile: "+j+", "+k+"\n");
+	public int[] calcPileScoreRightWeightOnTop(int route, int j, int k, int weight, List<Container> containers) {
+		System.out.printf("We now calculate the score of pile: "+j+", "+k+", which has the right weight on top, weight: "+weight+"\n");
 		System.out.printf("These are the containers to be loaded:\n");
 		for(Container c:containers) {
 			c.tellPosition();
 		}
 		int freespots = 0;
-		int b0 = nrOfBlockingsUntill(route, nrOfLayers, j,k)[0];
+		int b0 = nrOfBlockingsUntill(route, nrOfLayers-1, j,k)[0];
 		for(int i=0;i<nrOfLayers;i++) {
 			if(stowage[i][j][k] == 0) {
 				freespots++;
@@ -311,20 +346,25 @@ public class Boat {
 		int maxToBeLoaded = amountOfWeightClassInTryingSet(containers, weight);		
 		int h = Math.min(freespots, maxToBeLoaded);
 		int n = amountInWeightClassOnTop(j,k,weight);
-		int maxUnload = nrOfLayers- freespots+1;
-		int obj = 0;
-		for(int m = 0; m<= n;m++) {
-			int bm = nrOfBlockingsAfterMovement(route, m, h, j, k, containers);
-			System.out.printf("If we take off: "+m+" containers, we end up with this score:\n");
-			System.out.printf("h is: "+h+", the min of freespots "+freespots+" and nr of c. in weightclass: "+maxToBeLoaded+"\n");
-			System.out.printf("The initial blocking number: "+b0+"\n");
-			System.out.printf("Blocking number after movements are complete: "+bm+"\n");
-			System.out.printf("Voluntary shifts needed: "+m+"\n");
-			int currentObj = h + b0 - nrOfBlockingsAfterMovement(route, m,h, j,k, containers) ;
-			if(currentObj > obj) {
-				obj = currentObj;
+		int obj[] = {0,0,0,0};
+		obj[2] = h;
+		if(n > 0) {
+			for(int m = 0; m<= n;m++) {
+				int bm = nrOfBlockingsAfterMovement(route, m, h, j, k, containers);
+				System.out.printf("If we take off: "+m+" containers, we end up with this score:\n");
+				System.out.printf("h is: "+h+", the min of freespots "+freespots+" and nr of c. in weightclass: "+maxToBeLoaded+"\n");
+				System.out.printf("The initial blocking number: "+b0+"\n");
+				System.out.printf("Blocking number after movements are complete: "+bm+"\n");
+				System.out.printf("Voluntary shifts needed: "+m+"\n");
+				int currentObj = h + b0 - nrOfBlockingsAfterMovement(route, m,h, j,k, containers) ;
+				if(currentObj >= obj[0]) {
+					obj[0] = currentObj;
+					obj[1] = m;
+					obj[3] = nrOfLayers-freespots-m;
+				}
 			}
 		}
+
 		return obj;
 	}
 	
@@ -342,6 +382,14 @@ public class Boat {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean pileIsEligible(int j, int k, int weight) {
+		if(this.stowage[0][j][k] > 0 && this.stowage[nrOfLayers -1][j][k] == 0 && highestContainerHasWeight(j,k,weight)) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 	
 }

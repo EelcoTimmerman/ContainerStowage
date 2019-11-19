@@ -271,9 +271,9 @@ public class Container {
 			}
 			int res;
 			if(this.export == true) {
-				res = weight + dest + 50;
+				res = weight - dest + 50;
 			}else {
-				res = weight + dest;
+				res = weight - dest;
 			}
 			return res;
 		}

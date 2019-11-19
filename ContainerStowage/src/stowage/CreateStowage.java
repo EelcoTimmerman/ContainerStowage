@@ -2,6 +2,7 @@ package stowage;
 import containersAndBoat.Container;
 import containersAndBoat.Boat;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -128,29 +129,114 @@ public class CreateStowage {
 		 
 	 }
 	 
-	 public static void applyMVSD(Boat boat, int route, Terminal terminal) {
-		Container c = terminal.unloadedImport.get(0);
-		int highestWeight = c.weight;
-		boat.showDestStowage();
-		System.out.printf("The highest weight in the trying set is "+highestWeight+"\n");
+	 public static boolean containsWeight(List<Container> containers, int weight) {
+		 for(Container c:containers) {
+			 if(c.weight == weight) {
+				 return true;
+			 }
+		 }
+		 return false;
+	 }
+	 
+	 public static boolean insertInRightWeight(Boat boat, int route, Terminal terminal, int weight) {
+		System.out.printf("The trying set contains weight "+weight+", looking for a pile with this on top.\n");
+		int highscore = -100;	
+		int score =0;
+		int m = 0;
+		int h = 0;
+		int bestRow = 0;
+		int bestBay = 0;
+		int startZ = 0;
+		
 		for(int j=0;j<Boat.nrOfRows;j++) {
-			 for(int k=0;k<Boat.nrOfBays;k++) {
-				boat.calcPileScoreRightWeightOnTop(route, j, k, highestWeight, terminal.unloadedImport);
+				for(int k=0;k<Boat.nrOfBays;k++) {
+					if(boat.pileIsEligible(j,k,weight)) {
+						score = boat.calcPileScoreRightWeightOnTop(route, j, k, weight, terminal.unloadedImport)[0];
+						if(score >= highscore) {
+							highscore = score;
+							m = boat.calcPileScoreRightWeightOnTop(route, j, k, weight, terminal.unloadedImport)[1];
+							h = boat.calcPileScoreRightWeightOnTop(route, j, k, weight, terminal.unloadedImport)[2];
+							startZ = boat.calcPileScoreRightWeightOnTop(route, j, k, weight, terminal.unloadedImport)[3];
+							bestRow = j;
+							bestBay = k;
+						}
+					}
+				}
+		}
+		if(highscore>-100) {
+			insertionInPile(boat, terminal, weight,startZ, bestRow,bestBay,m,h);
+			return true;
+		}else {
+			return false;
+		}
+	 }
+	 
+	 public static void insertionInPile(Boat boat, Terminal terminal, int weight, int startZ, int j, int k, int m, int h) {
+		 List<Container> floatingContainers = new ArrayList<Container>();
+		 //remove the m top containers from the barge
+		 for(int i=0;i<Boat.nrOfLayers;i++) {		
+				 for(int f = startZ;f<startZ+m;f++) {
+					 for(Container c:boat.containersOnBoat) {
+						 if(c.zLoc == f && c.xLoc == k && c.yLoc == j) {
+							 c.removeFromBarge(boat);
+							 floatingContainers.add(c);
+						 }
+					 }
+				 }
+				 break;
+		 }
+		 //remove the first h containers with the right weight from the barge
+		 for(int g = 0;g<h;g++) {
+			 for(Container c:terminal.unloadedImport) {
+				 if(c.weight == weight && c.shifted) {
+					 terminal.unloadedImport.remove(c);
+					 terminal.shiftedContainers.remove(c);
+					 floatingContainers.add(c);
+					 break;
+				 }else if(c.weight == weight && c.shifted == false) {
+					 terminal.unloadedImport.remove(c);
+					 floatingContainers.add(c);
+					 break;					 
+				 }
+			 }
+		 }
+		 //sort the group, and make it rain
+		 floatingContainers.sort(Comparator.comparing(Container::getOrder));
+		 for(Container c:floatingContainers) {
+			 int count = 0;
+			 boat.set20footSpotOccupied(startZ+count ,j,k, c.weight, c.getDest());
+			  c.updateLocationOnBarge(startZ+count,j,k);
+			  c.transported = true;
+			  count++;
+		 }		 
+	 }
+	 
+	 public static void applyMVSD(Boat boat, int route, Terminal terminal) {
+		boat.showStowage();
+		for(int weight=3;weight>0;weight--) {
+			while( containsWeight(terminal.unloadedImport,weight) ) {
+				if( insertInRightWeight(boat,route,terminal,weight)) {				
+				}else {
+					break;
+				}
+			}
+
+		}
+		if(terminal.unloadedImport.size() > 0) {
+			for(Container c1: terminal.unloadedImport) {
+				c1.putInAnyPlace(boat, 0, Boat.nrOfRows, 0, Boat.nrOfBays);
 			}
 		}
-		
 		//look for places with that weight on top
 		//if(found){   say with n  containers of that weight class on top
 		//calculate obj = max_m h(m) + b(0) - b(m) - g(m) for 0<= m <= n.
 		// then select the pile with the highest obj and take away m* containers there.
 		//else{ do the same but then for the pile where you have to take away the least to reach the right weight class
-		 System.out.print("Starting the MVSD procedure, ");
-
 	 }
 	
 	 public static void loadBoat(Boat boat, int route, Terminal terminal) {
 			loadOneSequence(boat,route,terminal);
-			if(terminal.unloadedImport.size() > 0) {
+			if(terminal.unloadedImport.size() > 0 && boat.countFreeSlots() >0) {
 				applyMVSD(boat,route, terminal);
 			}
 		// while(terminal.unloadedImport.size() != 0 && boat.countFreeSlots() != 0) {
