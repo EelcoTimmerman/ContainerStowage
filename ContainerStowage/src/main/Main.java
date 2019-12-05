@@ -18,19 +18,7 @@ public class Main {
 		List <Container> containers = cset.getContainers();
 		CreateStowage stowagePlanner = new CreateStowage(containers, boat);
 		stowagePlanner.createInitialStowage();
-		ALNS alns = new ALNS();
-		int i = 0;
-		int maxIt = 1;
-		double bestSolution = 0;
-		double solution = 0;
-		while(i< maxIt) {
-			alns.alterSolution();
-			solution = alns.calculateObjective(boat);
-			if(solution > bestSolution) {
-				bestSolution = solution;
-			}
-			i++;
-		}
+		stowagePlanner.calculateObjective(boat);
 	}
 
 
