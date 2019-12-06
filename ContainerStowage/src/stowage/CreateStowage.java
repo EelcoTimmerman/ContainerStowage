@@ -16,37 +16,36 @@ public class CreateStowage {
 	 public Boat initialBoat;
 	 
 	 public CreateStowage(List<Container> containers, Boat boat) {
-		 containers.sort(Comparator.comparing(Container::getOrder));
+		 containers.sort(Comparator.comparing(Container::getInitOrder));
 		 fixedContainers = containers;
 		 this.initialBoat = boat;
 	 }
 	 	 
 	 public void createInitialStowage() {
 		 for(Container c: fixedContainers) {
-			 if(c.export) {
-				c.findFeasibleLocation(this.initialBoat,0);
+			 if(c.export&&c.findFeasibleInitialLocation(this.initialBoat)) {
 				this.initialBoat.containersOnBoat.add(c);
 			 }
 		 }
 	 }
 	 
-		public double calculateObjective(Boat boat) {
-			double value =0;	
-			 for(Container c:CreateStowage.fixedContainers) {
-					if(c.export == true && c.isOnBarge &&c.type == ContainerType.TWENTY) {
-						value++;
-					}else if(c.export == true && c.isOnBarge &&c.type == ContainerType.FORTY) {
-						value += 2;
-					}
-				}
-				for(int r = 0;r<TerminalSet.nrOfRoutes;r++) {
-					OverstowageCalculator Ocalc = new OverstowageCalculator(TerminalSet.terminals, boat, ContainerSet.containers, TerminalSet.routes);
-					Ocalc.reportRoute(r);
-					value += TerminalSet.routeProb[r]* Ocalc.addedValue();
-					}
-			 System.out.printf("The resulting objective for this initial stowage is: "+value+"\n");
-			 return value;
-		 }
+	public double calculateObjective(Boat boat) {
+		double value =0;	
+		for(Container c:CreateStowage.fixedContainers) {
+			if(c.export == true && c.isOnBarge &&c.type == ContainerType.TWENTY) {
+				value++;
+			}else if(c.export == true && c.isOnBarge &&c.type == ContainerType.FORTY) {
+				value += 2;
+			}
+		}
+		for(int r = 0;r<TerminalSet.nrOfRoutes;r++) {
+			OverstowageCalculator Ocalc = new OverstowageCalculator(TerminalSet.terminals, boat, ContainerSet.containers, TerminalSet.routes);
+			Ocalc.reportRoute(r);
+			value += TerminalSet.routeProb[r]* Ocalc.addedValue();
+		}
+		System.out.printf("The resulting objective for this initial stowage is: "+value+"\n");
+		return value;
+	}
 	 
 	 public static void  removeExport(Boat boat, Terminal terminal, List<Container> copyContainers) {
 		 for(int i = Boat.nrOfLayers -1;i>-1;i--) {

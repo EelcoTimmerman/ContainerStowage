@@ -1,21 +1,25 @@
 package stowage;
 import java.util.Random;
+
+
 import java.util.ArrayList;
 import java.util.List;
 import stowage.Terminal;
 
 public class TerminalSet {
 	public static int nrOfTerminals = 4; // this includes the dryport
-	public static int nrOfRoutes = 2;
+	public static int nrOfRoutes = 3;
 	public static int[] firstIndices = new int[nrOfRoutes];
 	public static int[][] routes = new int[nrOfRoutes][nrOfTerminals-1];
 	public static double[] routeProb= new double [nrOfRoutes];
 	public static List<Terminal> terminals = new ArrayList<>();
+	public static double[] ranks = new double[nrOfTerminals-1];
 	
 	public TerminalSet() {
 		int id = 0;
 		decideRoutes();
 		decideRouteProbabilities();
+		calcRank();
 		for(int i = 0; i<nrOfTerminals; i++) {
 			Terminal terminal = new Terminal(id);
 			id++;
@@ -90,6 +94,22 @@ public class TerminalSet {
 
 		}
 	}
-
+	
+	public static void calcRank() {
+		for(int g=1; g<TerminalSet.nrOfTerminals;g++) {
+			double rank = 0;
+			for(int h =0;h<TerminalSet.nrOfRoutes;h++) {
+				for(int i=0;i<TerminalSet.nrOfTerminals-1;i++)
+				if(g == routes[h][i]) {
+					rank += i*TerminalSet.routeProb[h];
+				}
+			}
+			ranks[g-1] = rank;
+		}
+		for(int i=0;i<nrOfTerminals-1;i++) {
+			int j = i+1;
+			System.out.printf("Rank terminal "+j+" equals: "+ ranks[i] +"\n");
+		}
+	}
 	
 }

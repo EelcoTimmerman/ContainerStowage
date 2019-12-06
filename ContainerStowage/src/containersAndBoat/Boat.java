@@ -392,4 +392,30 @@ public class Boat {
 		}
 	}
 	
+	public int[] giveHighestRank(int weight){
+		int[] tierRowBay = {-1,-1,-1};
+		double highscore =-1;
+		for(int i =0;i<Boat.nrOfLayers;i++) {
+			for(int j =0;j<Boat.nrOfRows;j++) {
+				for(int k =0;i<Boat.nrOfBays;k++) {
+					if(pileIsEligible(j,k, weight)) {
+						double score = TerminalSet.ranks[destStowage[i][j][k]-1 ];
+						if(score >= highscore) {
+							highscore = score;
+							tierRowBay[0] = i;
+							tierRowBay[1] = j;
+							tierRowBay[2] = k;
+						}
+					}
+				}
+			}
+		}
+		return tierRowBay;
+	}
+	
+	
+
+	
+
+	
 }

@@ -15,6 +15,7 @@ public class Container {
 		public boolean export;
 		public boolean transported;
 		public boolean shifted;
+		public double order;
 
 		
 		public Container(int id) {
@@ -70,6 +71,19 @@ public class Container {
 				return 9;
 			}
 		}
+		
+		public boolean findFeasibleInitialLocation(Boat boat) {
+			if(placeOnSameDestInit(boat)) {
+				return true;
+			}else if(putItOnTheBottom(boat, 0, Boat.nrOfRows,0,Boat.nrOfBays)) {
+				return true;
+			}else if(putOnHighestRank(boat)) {
+				return true;
+			}
+			
+			return true;
+		}
+		
 		
 		public boolean findFeasibleLocation(Boat boat, int route){
 			boat.calcWeight();
@@ -261,11 +275,11 @@ public class Container {
 		return false;
 		}
 		
-		public int getOrder() {
+		public void setOrder(int route) {
 			int weight = -this.weight*100;
 			int dest = -1;
 			for(int i =0;i<TerminalSet.nrOfTerminals-1;i++) {
-				if(this.destination.id == TerminalSet.routes[0][i]) {
+				if(this.destination.id == TerminalSet.routes[route][i]) {
 					dest = i;
 				}
 			}
@@ -274,6 +288,21 @@ public class Container {
 				res = weight - dest + 50;
 			}else {
 				res = weight - dest;
+			}
+			this.order = res;
+		}
+		
+		public double getOrder() {
+			return this.order;
+		}
+		
+		public double getInitOrder() {
+			int weight = -this.weight*100;
+			double res;
+			if(this.export == true) {
+				res = weight - TerminalSet.ranks[this.getDest()-1] + 50;
+			}else {
+				res = weight;
 			}
 			return res;
 		}
@@ -407,7 +436,59 @@ public class Container {
 			return false;
 		}
 		
-
+		public boolean placeOnSameDestInit(Boat boat) {
+			if(this.weight == 1) {
+				if( tryOnLightContainerSameInit(boat) ) {
+					System.out.print("Putting container "+displayID+" on top of a light one, same destination.\n");
+					return true;
+				}else if(tryOnMediumContainerSameDestInit(boat)){
+					System.out.print("Putting container "+displayID+" on top of a medium one, same destination.\n");
+					return true;
+				}else {
+					if(tryOnHeavyContainerSameDestInit(boat)) {
+						System.out.print("Putting container "+displayID+" on top of a heavy one, same destination.\n");
+						return true;
+					}
+				}
+			}
+			if(this.weight == 2) {
+				if(tryOnMediumContainerSameDestInit(boat) ) {
+					System.out.print("Putting container "+displayID+" on top of a medium one, same destination.\n");
+					return true;
+				}else {
+					if(tryOnHeavyContainerSameDestInit(boat)) {
+						System.out.print("Putting container "+displayID+" on top of a heavy one, same destination.\n");
+						return true;
+					}
+				}
+			}
+			if(this.weight == 3) {
+				if(tryOnHeavyContainerSameDestInit(boat) ) {
+					System.out.print("Putting container "+displayID+" on top of a heavy one, same destination.\n");
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		public boolean putOnHighestRank(Boat boat) {
+			if(boat.countFreeSlots() == 0) {
+				return false;
+			}else {
+				int[] pos = {-1,-1,-1}; 
+				pos = boat.giveHighestRank(this.weight);
+				int tier = pos[0];
+				int row = pos[1];
+				int bay = pos[2];
+				 if(is20Feasible(boat,tier,row,bay)) {
+					  boat.set20footSpotOccupied(tier,row,bay, this.weight, getDest());
+					  updateLocationOnBarge(tier,row,bay);
+					  transported = true;
+					  return true;
+				  }
+			}
+			return false;
+		}
 		
 		public boolean tryOnLightContainerInOrder(Boat boat,int route, int rowstart, int rowend, int baystart, int bayend) {
 			for(int i = 1; i< Boat.nrOfLayers;i++){
@@ -583,6 +664,56 @@ public class Container {
 		return false;
 		}
 
+		public boolean tryOnLightContainerSameInit(Boat boat) {
+			for(int i = 1; i< Boat.nrOfLayers;i++){
+				  for(int j = 0; j< Boat.nrOfRows;j++){
+					  for(int k = 0; k< Boat.nrOfBays;k++) {
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsLightweight(boat, i,j,k) &&
+								  containerBelowHasSameDestination(boat,i,j,k)) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
+							  updateLocationOnBarge(i,j,k);
+							  transported = true;
+							  return true;
+						  }
+					  }
+				  }
+			}
+		return false;
+		}
+		
+		public boolean tryOnMediumContainerSameDestInit(Boat boat) {
+			for(int i = 1; i< Boat.nrOfLayers;i++){
+				  for(int j = 0; j< Boat.nrOfRows;j++){
+					  for(int k = 0; k< Boat.nrOfBays;k++) {
+						  if(is20Feasible(boat,i,j,k) && containerBelowIsMediumweight(boat,i,j,k) &&
+							  containerBelowHasSameDestination(boat,i,j,k)) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
+							  updateLocationOnBarge(i,j,k);
+							  transported = true;
+							  return true;
+						  }
+					  }
+				  }
+			}
+		return false;
+		}
+		
+		public boolean tryOnHeavyContainerSameDestInit(Boat boat) {
+			for(int i = 1; i< Boat.nrOfLayers;i++){
+				  for(int j = 0; j< Boat.nrOfRows;j++){
+					  for(int k = 0; k< Boat.nrOfBays;k++) {
+						  if( is20Feasible(boat,i,j,k) && containerBelowHasSameDestination(boat,i,j,k)) {
+							  boat.set20footSpotOccupied(i,j,k, this.weight, getDest());
+							  updateLocationOnBarge(i,j,k);
+							  transported = true;
+							  return true;
+						  }
+					  }
+				  }
+			}
+		return false;
+		}
+		
 		
 		public boolean containerBelowIsMediumweight(Boat boat, int i, int j, int k ) {
 			if(i>0 && boat.stowage[i-1][j][k] == 2) {
