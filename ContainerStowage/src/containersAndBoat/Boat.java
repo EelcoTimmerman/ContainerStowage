@@ -11,7 +11,7 @@ import stowage.TerminalSet;
 public class Boat {
 	public static int nrOfBays = 6;
 	public static int nrOfLayers = 3;
-	public static int nrOfRows = 1;
+	public static int nrOfRows = 3;
 	public int leftback = 0;
 	public int rightback = 0;
 	public int leftfront = 0;
@@ -20,7 +20,7 @@ public class Boat {
 	public int rightweight= 0;
 	public int backweight =0;
 	public int frontweight =0;
-	public int q1 = 500; //barge capacity
+	public int q1 = 20; //barge capacity
 	public int q2 = 500; // max left/right weight difference
 	public int q3 = 500;  // front/back weight difference
 	public List<Container> containersOnBoat = new ArrayList<>();
@@ -131,6 +131,18 @@ public class Boat {
 				}
 			}
 		}
+		return weight;
+	}
+	
+	public int calcTotalWeight() {
+		int weight =0;
+		for(int i =0;i<nrOfLayers;i++) {
+			for(int j=0;j<nrOfRows;j++) {
+				for(int k = 0;k<nrOfBays;k++) {
+					weight += stowage[i][j][k];
+				}
+			}
+		}	
 		return weight;
 	}
 	
@@ -395,14 +407,16 @@ public class Boat {
 	public int[] giveHighestRank(int weight){
 		int[] tierRowBay = {-1,-1,-1};
 		double highscore =-1;
-		for(int i =0;i<Boat.nrOfLayers;i++) {
+		for(int i =0;i<Boat.nrOfLayers-1;i++) {
 			for(int j =0;j<Boat.nrOfRows;j++) {
-				for(int k =0;i<Boat.nrOfBays;k++) {
-					if(pileIsEligible(j,k, weight)) {
-						double score = TerminalSet.ranks[destStowage[i][j][k]-1 ];
+				for(int k =0;k<Boat.nrOfBays;k++) {
+					if(destStowage[i][j][k]>0 && destStowage[i+1][j][k]==0) {
+						int place = destStowage[i][j][k]-1;
+						System.out.printf("Place in the rank list trying to obtain: "+place+"\n");
+						double score = TerminalSet.ranks[place];
 						if(score >= highscore) {
 							highscore = score;
-							tierRowBay[0] = i;
+							tierRowBay[0] = i+1;
 							tierRowBay[1] = j;
 							tierRowBay[2] = k;
 						}

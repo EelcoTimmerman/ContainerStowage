@@ -13,6 +13,7 @@ import java.util.List;
 public class CreateStowage {
 //take as input the set of containers that has been created,
 	 public static List<Container> fixedContainers;
+	 public List<Container> tryingSet = new ArrayList<>();
 	 public Boat initialBoat;
 	 
 	 public CreateStowage(List<Container> containers, Boat boat) {
@@ -23,10 +24,15 @@ public class CreateStowage {
 	 	 
 	 public void createInitialStowage() {
 		 for(Container c: fixedContainers) {
-			 if(c.export&&c.findFeasibleInitialLocation(this.initialBoat)) {
-				this.initialBoat.containersOnBoat.add(c);
+			 if(c.export) {
+				if(c.findFeasibleInitialLocation(this.initialBoat)) {
+					this.initialBoat.containersOnBoat.add(c);
+				}else {
+					this.tryingSet.add(c);
+				}
 			 }
 		 }
+		 reachCapacity(initialBoat, initialBoat.containersOnBoat);
 	 }
 	 
 	public double calculateObjective(Boat boat) {
@@ -66,6 +72,80 @@ public class CreateStowage {
 			 }
 		 }
 	 }
+	 
+	 public void reachCapacity(Boat boat, List<Container> cOnBoard) {
+		 int weight = boat.calcTotalWeight();
+		 while(weight > + boat.q1) {
+			 int[] h = calcHeaviestWeightFrom(cOnBoard);
+			 removeHeavyContainer(boat, h[1]);
+			 if(this.tryingSet.isEmpty() == false) {
+				 System.out.print("Trying set is not empty.");
+				 int[] l = calcLightestWeightFrom(tryingSet);
+				 if(h[0] > l[0]) {
+					 for (Iterator<Container> iterator2 = this.tryingSet.iterator(); iterator2.hasNext();) {
+						 Container c =iterator2.next();
+						 if(c.id == l[1]) {
+							 c.findFeasibleInitialLocation(boat);
+							 iterator2.remove();
+						 }
+					 }
+				}
+			 }			 
+			 weight = boat.calcTotalWeight();
+			 System.out.printf("Total weight: "+weight+".\n");
+		 }
+		 System.out.printf("Total weight: "+weight+".\n");
+	 }
+	 
+	 public static void removeHeavyContainer(Boat boat, int outId) {
+		 for (Iterator<Container> iterator2 = boat.containersOnBoat.iterator(); iterator2.hasNext();) {
+			 Container c = iterator2.next();
+			 if(c.id == outId) {
+				 for(Container c2:boat.containersOnBoat) {
+					 if(c2.xLoc == c.xLoc && c2.yLoc == c.yLoc && c2.zLoc>c.zLoc) {
+						 int newheight =c2.zLoc-1;
+						 System.out.printf("New height of container that falls: "+newheight+".\n");
+						 boat.set20LocationEmpty(c2.zLoc, c2.yLoc, c2.xLoc);
+						 c2.updateLocationOnBarge(newheight, c2.yLoc, c2.xLoc);
+						 boat.set20footSpotOccupied(newheight, c2.yLoc, c2.xLoc, c2.weight, c2.getDest());
+						 int weight = boat.calcTotalWeight();
+						 System.out.printf("Total weight after falling: "+weight+".\n");
+					 }
+				 }
+				 c.removeFromBarge(boat);
+				 iterator2.remove();
+			 }
+		 }
+
+		 
+	 }
+	 	 
+	 public static int[] calcHeaviestWeightFrom(List<Container> containers) {
+		 int[] heaviestWeight = {-1,-1};
+		 for(Container c:containers) {
+			 if(c.weight>heaviestWeight[0]) {
+				 heaviestWeight[0]= c.weight;
+				 heaviestWeight[1]= c.id;
+			 }
+		 }		 
+		 System.out.printf("The heaviest container on board has ID: "+heaviestWeight[1]+", with weight: "+heaviestWeight[0]+".\n");
+		 return heaviestWeight;
+	 }
+	 
+	 public static int[] calcLightestWeightFrom(List<Container> containers) {
+		 int[] lightestWeight = {5,-1};
+		 for(Container c:containers) {
+			 if(c.weight<lightestWeight[0]) {
+				 lightestWeight[0]= c.weight;
+				 lightestWeight[1]= c.id;
+
+			 }
+		 }		 
+		 System.out.printf("The lightest container on board has ID: "+lightestWeight[1]+", with weight: "+lightestWeight[0]+".\n");
+		 return lightestWeight;
+	 }
+	 
+	 
 	 
 	 public static boolean hasContainersAbove(Container c, Boat boat) {	 
 		 if(c.isOnBarge == true && c.zLoc< Boat.nrOfLayers - 1 ) {

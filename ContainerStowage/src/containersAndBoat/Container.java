@@ -79,8 +79,7 @@ public class Container {
 				return true;
 			}else if(putOnHighestRank(boat)) {
 				return true;
-			}
-			
+			}			
 			return true;
 		}
 		
@@ -475,11 +474,11 @@ public class Container {
 			if(boat.countFreeSlots() == 0) {
 				return false;
 			}else {
-				int[] pos = {-1,-1,-1}; 
-				pos = boat.giveHighestRank(this.weight);
-				int tier = pos[0];
+				int pos[] = boat.giveHighestRank(this.weight);
+				int tier  = pos[0];
 				int row = pos[1];
 				int bay = pos[2];
+				System.out.printf("highest rank is position "+tier+", "+row+", "+bay+"\n");
 				 if(is20Feasible(boat,tier,row,bay)) {
 					  boat.set20footSpotOccupied(tier,row,bay, this.weight, getDest());
 					  updateLocationOnBarge(tier,row,bay);
