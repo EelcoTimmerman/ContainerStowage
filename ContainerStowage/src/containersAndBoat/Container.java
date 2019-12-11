@@ -80,7 +80,7 @@ public class Container {
 			}else if(putOnHighestRank(boat)) {
 				return true;
 			}			
-			return true;
+			return false;
 		}
 		
 		

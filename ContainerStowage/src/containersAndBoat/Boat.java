@@ -9,9 +9,9 @@ import stowage.Terminal;
 import stowage.TerminalSet;
 
 public class Boat {
-	public static int nrOfBays = 6;
+	public static int nrOfBays = 4;
 	public static int nrOfLayers = 3;
-	public static int nrOfRows = 3;
+	public static int nrOfRows = 1;
 	public int leftback = 0;
 	public int rightback = 0;
 	public int leftfront = 0;
@@ -48,7 +48,7 @@ public class Boat {
 				  }
 			  }
 		  }
-		showDestStowage();
+		//showDestStowage();
 		calcWeight();
 		//reportWeight();
 	}
