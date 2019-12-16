@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import stowage.CreateStowage;
 import stowage.Terminal;
@@ -11,7 +12,7 @@ import stowage.TerminalSet;
 public class Boat {
 	public static int nrOfBays = 4;
 	public static int nrOfLayers = 3;
-	public static int nrOfRows = 1;
+	public static int nrOfRows = 3;
 	public int leftback = 0;
 	public int rightback = 0;
 	public int leftfront = 0;
@@ -20,9 +21,9 @@ public class Boat {
 	public int rightweight= 0;
 	public int backweight =0;
 	public int frontweight =0;
-	public int q1 = 20; //barge capacity
-	public int q2 = 500; // max left/right weight difference
-	public int q3 = 500;  // front/back weight difference
+	public int q1 = 2000; //barge capacity
+	public int q2 = 16; // max left/right weight difference
+	public int q3 = 32;  // front/back weight difference
 	public List<Container> containersOnBoat = new ArrayList<>();
 
 	public static int weightBoat;
@@ -169,6 +170,158 @@ public class Boat {
 		System.out.printf("Right Weight: "+this.rightweight+"\n");
 		System.out.printf("Front Weight: "+this.frontweight+"\n");
 		System.out.printf("Back Weight: "+this.backweight+"\n");
+	}
+	
+	public boolean swapColumns() {
+		reportWeight();
+		showStowage();
+		int[] coordinates = whereIsColumnSwapNeeded();
+		System.out.printf("Heavy column row:"+coordinates[2]+" bay:"+coordinates[3]+"\n");
+		System.out.printf("Light column row:"+coordinates[0]+" bay:"+coordinates[1]+"\n");
+
+			//swap dest
+			//swap weight
+		for(int i=0;i<Boat.nrOfLayers;i++) {
+			int res = destStowage[i][coordinates[0]][coordinates[1]];
+			destStowage[i][coordinates[0]][coordinates[1]] = destStowage[i][coordinates[2]][coordinates[3]];
+			destStowage[i][coordinates[2]][coordinates[3]] = res;
+			int resi = stowage[i][coordinates[0]][coordinates[1]];
+			stowage[i][coordinates[0]][coordinates[1]] = stowage[i][coordinates[2]][coordinates[3]];
+			stowage[i][coordinates[2]][coordinates[3]] = resi;
+		}
+		int yres = -1;
+		int xres = -1;
+		for(Container c:this.containersOnBoat) {
+			if(c.yLoc == coordinates[0] && c.xLoc == coordinates[1]) {
+				yres= c.yLoc;
+				xres = c.xLoc;
+				for(Container c2:this.containersOnBoat) {
+					if(c2.yLoc == coordinates[2] && c2.xLoc == coordinates[3]) {
+						c2.yLoc = yres;
+						c2.xLoc = xres;
+					}
+				}
+				c.yLoc = coordinates[2];
+				c.xLoc = coordinates[3];
+			}
+			break;
+		}
+		showStowage();
+		return false;
+	}
+	
+	public boolean crossBalanceSatisfied() {
+		if(frontweight - backweight - q3 > 0) {
+			return false;
+		}else if(backweight - frontweight - q3 > 0) {
+			return false;
+		}
+		if(rightweight - leftweight - q2 > 0) {
+			return false;
+		}else if(leftweight - rightweight - q2 > 0) {
+			return false;
+		}
+		return true;
+	}
+	
+	public int[] whereIsColumnSwapNeeded() {
+		int[] heavyArea = {0,Boat.nrOfRows-1,0,Boat.nrOfBays-1};
+		int[] lightArea = {0,Boat.nrOfRows-1,0,Boat.nrOfBays-1}; 
+		int[] coordinates = {-1,-1,-1,-1};
+		calcWeight();
+		if(frontweight - backweight - q3 > 0) { //weight moves from front to back
+			if(baysAreEven()) {
+				heavyArea[2] = Boat.nrOfBays/2;  //begin
+				lightArea[3] = Boat.nrOfBays/2 - 1;
+			}else {
+				heavyArea[2] = Boat.nrOfBays/2 + 1;
+				lightArea[3] = Boat.nrOfBays/2 - 1;
+			}
+		}else if(backweight - frontweight - q3 > 0) {
+			if(baysAreEven()) {
+				heavyArea[3] = Boat.nrOfBays/2 -1; //end
+				lightArea[2] = Boat.nrOfBays/2 ; 
+			}else {
+				heavyArea[3] = Boat.nrOfBays/2 - 1 ;
+				lightArea[2] = Boat.nrOfBays/2 + 1 ;
+			}
+		}
+		if(rightweight - leftweight - q2 > 0) { //weight needs to go to the right
+			if(rowsAreEven()) {
+				heavyArea[0] = Boat.nrOfRows/2; //begin
+				lightArea[1] = Boat.nrOfRows/2 - 1; //begin
+			}else {
+				heavyArea[0] = Boat.nrOfRows/2 + 1;
+				lightArea[1] = Boat.nrOfRows/2 - 1;
+			}
+		}else if(leftweight - rightweight - q2 > 0){ // weight moves to left
+			if(rowsAreEven()) {
+				heavyArea[1] = Boat.nrOfRows/2 -1; //end
+				lightArea[0] = Boat.nrOfRows/2 ; //begin
+			}else {
+				heavyArea[1] = Boat.nrOfRows/2 - 1;
+				lightArea[0] = Boat.nrOfRows/2 + 1;
+			}
+		}
+		System.out.printf("Heavy area. Rows "+heavyArea[0]+"--"+heavyArea[1]+", Bays "+heavyArea[2]+"--"+heavyArea[3]+"\n");
+		System.out.printf("Light area. Rows "+lightArea[0]+"--"+lightArea[1]+", Bays "+lightArea[2]+"--"+lightArea[3]+"\n");
+		
+		coordinates[2] = returnHeavyColumn(heavyArea[0],heavyArea[1],heavyArea[2],heavyArea[3])[0];
+		coordinates[3] = returnHeavyColumn(heavyArea[0],heavyArea[1],heavyArea[2],heavyArea[3])[1];
+		coordinates[0] = returnLightColumn(lightArea[0],lightArea[1],lightArea[2],lightArea[3])[0];
+		coordinates[1] = returnLightColumn(lightArea[0],lightArea[1],lightArea[2],lightArea[3])[1];
+		return coordinates;
+	}
+	
+	public int[] returnHeavyColumn(int startRow, int endRow, int startBay, int endBay) {
+		int coordinates[] = {0,0};
+		 int maxWeight = 0;
+		  for(int j=startRow;j<endRow+1;j++) {
+			for(int k =startBay;k<endBay+1;k++) {
+				int weight = calcColumnWeight(j,k);
+				if(weight>= maxWeight) {
+					maxWeight = weight;
+					coordinates[0] = j;
+					coordinates[1] = k;
+				}
+			}
+		}
+		/*Random rand = new Random(1000);
+		Random rand2 = new Random(8920);
+		coordinates[0] = rand.nextInt((endRow - startRow) + 1) + startRow;
+		coordinates[1] = rand2.nextInt((endBay - startBay) + 1) + startBay;*/
+		System.out.printf("Weight heaviest column: "+maxWeight+"\n");
+		return coordinates; // max row, max bay
+	}
+	
+	public int[] returnLightColumn(int startRow, int endRow, int startBay, int endBay) {
+		int coordinates[] = {0,0};
+		
+		int minWeight = 100;		
+		for(int j=startRow;j<endRow+1;j++) {
+			for(int k =startBay;k<endBay+1;k++) {
+				int weight = calcColumnWeight(j,k);
+				if(weight<= minWeight) {
+					minWeight = weight;
+					coordinates[0] = j;
+					coordinates[1] = k;
+				}
+			}
+		}
+		System.out.printf("Weight lightest column: "+minWeight+"\n");
+		/*Random rand = new Random(1010);
+		Random rand2 = new Random(8320);
+		coordinates[0] = rand.nextInt((endRow - startRow) + 1) + startRow;
+		coordinates[1] = rand2.nextInt((endBay - startBay) + 1) + startBay*/;
+		return coordinates; //min row, min bay
+	}
+	
+	public int calcColumnWeight( int j, int k) {
+		int weight = 0;
+		for(int i=0;i<Boat.nrOfLayers;i++) {
+			weight += this.stowage[i][j][k];
+		}
+		return weight;		
 	}
 	
 	public int whereIsBalanceWeightNeeded(int weight) {

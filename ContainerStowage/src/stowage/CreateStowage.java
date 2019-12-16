@@ -33,6 +33,7 @@ public class CreateStowage {
 			 }
 		 }
 		 reachCapacity(initialBoat, initialBoat.containersOnBoat);
+		 reachStability(initialBoat);
 	 }
 	 
 	public double calculateObjective(Boat boat) {
@@ -101,6 +102,15 @@ public class CreateStowage {
 			 System.out.printf("(Un)loading operation successful, total weight: "+weight+".\n");
 		 }
 		 System.out.printf("Barge is now within capacity, total weight: "+weight+".\n");
+	 }
+	 
+	 public static void reachStability(Boat boat) {
+		 int i = 0;
+		 boat.reportWeight();
+		 while(boat.crossBalanceSatisfied() == false && i<50) {
+			 boat.swapColumns();
+			 i++;
+		 }
 	 }
 	 
 	 public static void removeHeavyContainer(Boat boat, int outId) {
