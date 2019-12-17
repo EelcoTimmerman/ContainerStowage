@@ -11,6 +11,7 @@ import stowage.OverstowageCalculator;
 public class Main {
 //Hey this is my first line, but its a comment so it doesnt do anyhting...
 	public static void main(String[] args) {
+		long startTime = System.currentTimeMillis();
 		TerminalSet terminals = new TerminalSet();
 		Boat boat = new Boat();
 		ContainerSet cset = new ContainerSet(terminals);
@@ -19,6 +20,9 @@ public class Main {
 		CreateStowage stowagePlanner = new CreateStowage(containers, boat);
 		stowagePlanner.createInitialStowage();
 		stowagePlanner.calculateObjective(boat);
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		System.out.printf("Runtime: "+ seconds + " milliseconds");
 	}
 
 

@@ -13,6 +13,8 @@ import java.util.List;
 public class CreateStowage {
 //take as input the set of containers that has been created,
 	 public static List<Container> fixedContainers;
+	 public static int[] totalTransported = new int[TerminalSet.nrOfRoutes];
+	 public static int[] shifts = new int[TerminalSet.nrOfRoutes];
 	 public static List<Container> tryingSet = new ArrayList<>();
 	 public Boat initialBoat;
 	 
@@ -38,19 +40,27 @@ public class CreateStowage {
 	 
 	public double calculateObjective(Boat boat) {
 		double value =0;	
+		int export = 0;
 		for(Container c:CreateStowage.fixedContainers) {
 			if(c.export == true && c.isOnBarge &&c.type == ContainerType.TWENTY) {
 				value++;
-			}else if(c.export == true && c.isOnBarge &&c.type == ContainerType.FORTY) {
-				value += 2;
+				export++;
 			}
 		}
 		for(int r = 0;r<TerminalSet.nrOfRoutes;r++) {
 			OverstowageCalculator Ocalc = new OverstowageCalculator(TerminalSet.terminals, boat, ContainerSet.containers, TerminalSet.routes);
 			Ocalc.reportRoute(r);
 			value += TerminalSet.routeProb[r]* Ocalc.addedValue();
+			totalTransported[r] = Ocalc.getTEU();
+			shifts[r] = Ocalc.getShifts();
 		}
-		System.out.printf("The resulting objective for this initial stowage is: "+value+"\n");
+		int exp = ContainerSet.countExport();
+		int imp = ContainerSet.nrOfContainers -exp;
+		System.out.printf("From: "+exp+" Export, and "+imp+" import, the resulting objective is: "+value+"\n");
+		System.out.printf("Export TEU realized: "+export+"\n");
+		for(int r = 0;r<TerminalSet.nrOfRoutes;r++) {
+			System.out.printf("Route " +r+". TEU import: "+totalTransported[r]+". Shifts: "+shifts[r]+"\n");
+		}
 		return value;
 	}
 	 

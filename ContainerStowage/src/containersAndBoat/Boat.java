@@ -10,7 +10,7 @@ import stowage.Terminal;
 import stowage.TerminalSet;
 
 public class Boat {
-	public static int nrOfBays = 4;
+	public static int nrOfBays = 6;
 	public static int nrOfLayers = 3;
 	public static int nrOfRows = 3;
 	public int leftback = 0;
@@ -21,9 +21,9 @@ public class Boat {
 	public int rightweight= 0;
 	public int backweight =0;
 	public int frontweight =0;
-	public int q1 = 2000; //barge capacity
-	public int q2 = 16; // max left/right weight difference
-	public int q3 = 32;  // front/back weight difference
+	public int q1 = 220; //barge capacity. about 2/3 of full volume with heavy containers.
+	public int q2 = 10; // max left/right weight difference, was 16. 8%
+	public int q3 = 3200;  // front/back weight difference, was 32. 16%
 	public List<Container> containersOnBoat = new ArrayList<>();
 
 	public static int weightBoat;
@@ -49,7 +49,7 @@ public class Boat {
 				  }
 			  }
 		  }
-		//showDestStowage();
+		showDestStowage();
 		calcWeight();
 		//reportWeight();
 	}
@@ -178,9 +178,30 @@ public class Boat {
 		int[] coordinates = whereIsColumnSwapNeeded();
 		System.out.printf("Heavy column row:"+coordinates[2]+" bay:"+coordinates[3]+"\n");
 		System.out.printf("Light column row:"+coordinates[0]+" bay:"+coordinates[1]+"\n");
+		int yres = -1;
+		int xres = -1;
+		for(Container c:this.containersOnBoat) {
+			if(c.yLoc == coordinates[2] && c.xLoc == coordinates[3]) {
+				c.yLoc = 1000;
+				c.xLoc = 1000;
+			}
 
-			//swap dest
-			//swap weight
+		}
+		for(Container c2:this.containersOnBoat) {
+			if(c2.yLoc == coordinates[0] && c2.xLoc == coordinates[1]) {
+				c2.yLoc = coordinates[2];
+				c2.xLoc = coordinates[3];
+			}
+		}
+		for(Container c3:this.containersOnBoat) {
+			if(c3.yLoc == 1000 && c3.xLoc == 1000) {
+				c3.yLoc = coordinates[0];
+				c3.xLoc = coordinates[1];
+				System.out.print("My new position: \n");
+				c3.tellPosition();
+			}
+
+		}
 		for(int i=0;i<Boat.nrOfLayers;i++) {
 			int res = destStowage[i][coordinates[0]][coordinates[1]];
 			destStowage[i][coordinates[0]][coordinates[1]] = destStowage[i][coordinates[2]][coordinates[3]];
@@ -189,23 +210,7 @@ public class Boat {
 			stowage[i][coordinates[0]][coordinates[1]] = stowage[i][coordinates[2]][coordinates[3]];
 			stowage[i][coordinates[2]][coordinates[3]] = resi;
 		}
-		int yres = -1;
-		int xres = -1;
-		for(Container c:this.containersOnBoat) {
-			if(c.yLoc == coordinates[0] && c.xLoc == coordinates[1]) {
-				yres= c.yLoc;
-				xres = c.xLoc;
-				for(Container c2:this.containersOnBoat) {
-					if(c2.yLoc == coordinates[2] && c2.xLoc == coordinates[3]) {
-						c2.yLoc = yres;
-						c2.xLoc = xres;
-					}
-				}
-				c.yLoc = coordinates[2];
-				c.xLoc = coordinates[3];
-			}
-			break;
-		}
+
 		showStowage();
 		return false;
 	}

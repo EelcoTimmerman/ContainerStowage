@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ContainerSet {
-	public static int nrOfContainers = 40;
+	public static int nrOfContainers = 120;
 	public double probOfExport = 0.5;
 	public static double probOf20foot = 1;
 	public TerminalSet tset;
@@ -38,7 +38,7 @@ public class ContainerSet {
 				tset.terminals.get(ind).initExport(c);
 			}else {
 				c.export = false;
-				tset.terminals.get(ind).initImport(c);
+				TerminalSet.terminals.get(ind).initImport(c);
 			}
 			int shh = rand.nextInt(100);
 			if(probOf20foot == 1) {
@@ -61,6 +61,16 @@ public class ContainerSet {
 		for(Container c: containers) {
 			c.tellPosition();
 		}
+	}
+	
+	public static int countExport() {
+		int count =0;
+		for(Container c:containers) {
+			if(c.export == true) {
+				count++;
+			}
+		}
+		return count;
 	}
 	
 	public List<Container> getContainers() {

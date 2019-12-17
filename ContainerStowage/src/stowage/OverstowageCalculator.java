@@ -74,6 +74,24 @@ public class OverstowageCalculator {
 		return (importedTEU - shiftCost*overstowage);
 	}
 	
+	public int getTEU() {
+		int count= 0;
+		for(int ii =0;ii<Boat.nrOfLayers;ii++) {
+			for(int jj=0;jj<Boat.nrOfRows;jj++) {
+				for(int kk=0;kk<Boat.nrOfBays;kk++) {
+					if(boatCopy.stowage[ii][jj][kk] > 0) {
+						count++;
+					}
+				}
+			}
+		}
+		return count;
+	}
+	
+	public int getShifts() {
+		return overstowage;
+	}
+	
 	public void reportRoute(int r) {	
 		int route = r+1;
 		System.out.printf("This is the case of route "+route+":\n");

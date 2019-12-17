@@ -79,10 +79,13 @@ public class Container {
 				return true;
 			}else if(putOnHighestRank(boat)) {
 				return true;
-			}			
+			}		
+			/*
+			if(putInAnyPlace(boat, 0, Boat.nrOfRows-1, 0, Boat.nrOfBays-1)) {
+				return true;
+			}*/
 			return false;
-		}
-		
+		}	
 		
 		public boolean findFeasibleLocation(Boat boat, int route){
 			boat.calcWeight();
